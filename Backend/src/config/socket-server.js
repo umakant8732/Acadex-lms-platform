@@ -1,6 +1,6 @@
-import { Server as SocketIoServer } from 'socket.io'
+﻿import { Server as SocketIoServer } from 'socket.io'
 
-import { env } from './env.js'
+import { allowedClientOrigins } from './client-origins.js'
 import { setSocketServer } from './socket-store.js'
 import { logger } from '../utils/logger.js'
 
@@ -8,7 +8,7 @@ import { logger } from '../utils/logger.js'
 export const setupSocketServer = httpServer => {
   const io = new SocketIoServer(httpServer, {
     cors: {
-      origin: env.CLIENT_URL,
+      origin: allowedClientOrigins,
       credentials: true
     }
   })

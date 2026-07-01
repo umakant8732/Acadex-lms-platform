@@ -1,4 +1,4 @@
-import { createClient } from 'redis'
+﻿import { createClient } from 'redis'
 
 import { env } from './env.js'
 
@@ -9,7 +9,7 @@ const redisClient = createClient({
 })
 
 redisClient.on('connect', () => {
-  logger.info('✅ Redis Connected')
+  logger.info('Redis connected')
 })
 
 redisClient.on('error', error => {

@@ -1,5 +1,6 @@
-import asyncHandler from '../../../utils/async-handler.js'
+﻿import asyncHandler from '../../../utils/async-handler.js'
 import ApiResponse from '../../../utils/api-response.js'
+import { cookieOptions } from '../constants/auth-constants.js'
 import { refreshTokenService } from '../services/refresh-token-service.js'
 
 export const refreshToken = asyncHandler(async (req, res) => {
@@ -7,12 +8,6 @@ export const refreshToken = asyncHandler(async (req, res) => {
 
   const { accessToken, refreshToken: newRefreshToken } =
     await refreshTokenService(refreshToken)
-
-  const cookieOptions = {
-    httpOnly: true,
-    secure: false,
-    sameSite: 'lax'
-  }
 
   res.cookie('accessToken', accessToken, cookieOptions)
 

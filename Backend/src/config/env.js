@@ -1,4 +1,4 @@
-import dotenv from 'dotenv'
+﻿import dotenv from 'dotenv'
 
 import { z } from 'zod'
 
@@ -24,11 +24,9 @@ const envSchema = z.object({
 
   CLIENT_URL: z.string(),
 
+  CLIENT_URLS: z.string().optional(),
+
   REDIS_URL: z.string(),
-
-  REDIS_HOST: z.string(),
-
-  REDIS_PORT: z.string(),
 
   EMAIL_USER: z.string(),
 
@@ -54,9 +52,19 @@ const envSchema = z.object({
 
   CLOUDFRONT_KEY_PAIR_ID: z.string(),
 
-  CLOUDFRONT_PRIVATE_KEY_PATH: z.string(),
+  CLOUDFRONT_PRIVATE_KEY: z.string().optional(),
+
+  CLOUDFRONT_PRIVATE_KEY_PATH: z.string().optional(),
 
   CLOUDFRONT_URL_EXPIRES_IN: z.string()
+}).superRefine((data, context) => {
+  if (!data.CLOUDFRONT_PRIVATE_KEY && !data.CLOUDFRONT_PRIVATE_KEY_PATH) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['CLOUDFRONT_PRIVATE_KEY'],
+      message: 'Provide CLOUDFRONT_PRIVATE_KEY or CLOUDFRONT_PRIVATE_KEY_PATH'
+    })
+  }
 })
 
 const parsedEnv = envSchema.safeParse(process.env)

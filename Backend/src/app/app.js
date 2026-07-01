@@ -1,4 +1,4 @@
-import express from 'express'
+﻿import express from 'express'
 
 import cors from 'cors'
 
@@ -20,35 +20,33 @@ import routes from '../routes/app-routes.js'
 
 import errorMiddleware from '../middlewares/error-middleware.js'
 
-import { env } from '../config/env.js'
+import { isAllowedClientOrigin } from '../config/client-origins.js'
 import { globalLimiter } from '../middlewares/rate-limit-middleware.js'
-
-
 
 const app = express()
 
-
-
-// CORS
+// Allows local tools without origin and trusted frontend apps with cookies.
 app.use(
   cors({
-    origin: env.CLIENT_URL,
+    origin: (origin, callback) => {
+      if (!origin || isAllowedClientOrigin(origin)) {
+        return callback(null, true)
+      }
+
+      return callback(new Error(`CORS blocked for origin: ${origin}`))
+    },
     credentials: true
   })
 )
 
-
 // SECURITY HEADERS
 app.use(helmet())
-
 
 // RESPONSE COMPRESSION
 app.use(compression())
 
-
 // HTTP REQUEST LOGGER
 app.use(morgan('dev'))
-
 
 // BODY PARSER
 app.use(express.json())
@@ -59,24 +57,17 @@ app.use(
   })
 )
 
-
 // COOKIE PARSER
 app.use(cookieParser())
-
 
 // MONGO SANITIZE
 // app.use(mongoSanitize())
 
-
 // HTTP PARAMETER POLLUTION
 app.use(hpp())
 
-
 // RATE LIMITER
-
-
 app.use(globalLimiter)
-
 
 app.use('/api/v1', routes)
 
