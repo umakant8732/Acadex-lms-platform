@@ -46,3 +46,7 @@ Thumbs.db
 PROJECT_SECRET_INVENTORY.txt
 PROD_ENV_BACKEND.txt
 
+
+# Local SSH and private key files
+*.pem
+*.ppk
