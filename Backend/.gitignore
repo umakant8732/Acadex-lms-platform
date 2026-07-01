@@ -1,0 +1,27 @@
+﻿# Dependencies
+node_modules/
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Credentials and certificates
+secure/*.pem
+secure/*.key
+secure/*.crt
+
+# Generated runtime folders
+logs/
+temp/
+uploads/
+coverage/
+
+# Runtime logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*

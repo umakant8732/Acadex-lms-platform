@@ -1,0 +1,43 @@
+﻿# Workspace secrets and generated folders
+logs/
+secreat-credentials/
+
+# Backend generated media and keys
+Backend/logs/
+Backend/temp/
+Backend/uploads/
+Backend/secure/*.pem
+Backend/secure/*.key
+Backend/secure/*.crt
+
+# Node.js dependencies and build output
+node_modules/
+dist/
+coverage/
+.vite/
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Runtime logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Editor and OS files
+.vscode/
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

@@ -1,0 +1,357 @@
+﻿ACADEX PLATFORM ROADMAP
+Updated: 2026-07-01
+
+Legend:
+[x] Completed / already built
+[ ] Pending / still needs implementation
+
+
+============================================================
+PHASE 1 - CORE LMS FOUNDATION
+============================================================
+
+Platform Shell / Shared UI
+[x] Acadex branding applied across public, student, and teacher UI
+[x] Shared app shell primitives introduced for reusable layout parts
+[x] Public and student footer unified into one shared footer
+[x] Public navbar responsive for mobile and tablet
+[x] Student navbar responsive for mobile and tablet
+[x] Teacher dashboard/sidebar responsive with mobile toggle flow
+[x] Shared folder cleanup and categorization pass completed
+[ ] Final deployment and production environment verification
+
+Course Module - Teacher Side
+[x] Backend course model, repository, service, controller, route flow
+[x] Course create API
+[x] Course update API
+[x] Course delete API
+[x] Course publish/unpublish API
+[x] Course details API
+[x] Manage courses listing API
+[x] Backend pagination, search, and category filter
+[x] Course validation using Zod
+[x] Course frontend API/service/query/hook/page structure
+[x] Manage courses page
+[x] Create course page
+[x] Update course page
+[x] View course page
+[x] Delete course integration
+[x] Publish/unpublish integration
+[x] React Paginate integration
+[x] Course module frontend cleanup and folder categorization
+[x] Course categories/constants/helpers cleanup
+[x] Course schema migrated to thumbnailKey-based storage
+[x] Thumbnail response URL built from CloudFront delivery helper
+[x] Teacher thumbnail presigned upload API
+[x] Teacher thumbnail complete-save API
+[x] Teacher direct S3 thumbnail upload from frontend
+[x] Thumbnail add flow from manage courses table row
+[x] Thumbnail replace flow from manage courses table row
+[x] Old thumbnail cleanup on replace (best effort delete)
+[x] CloudFront public thumbnails behavior configured successfully
+[ ] Remove thumbnail flow
+
+Course Module - Public / Student Surfaces
+[x] Public published courses catalog flow
+[x] Public course preview/details page
+[x] Auth-aware CTA branching on preview page
+[x] Student course library with real access state
+[x] Student course overview page with preview-aware hero/content
+[x] Student watch page route flow connected from overview and library
+
+Auth / Public Module Cleanup
+[x] Hooks added where needed
+[x] Auth/public module readability cleanup
+[ ] Forgot password API frontend integration
+[ ] Refresh token API/frontend flow
+[ ] Resend OTP API/frontend flow
+[ ] Profile update API/frontend flow
+[ ] Final auth edge-case testing
+
+
+============================================================
+LECTURE MODULE - TEACHER SIDE
+============================================================
+
+Lecture Module Foundation
+[x] Lecture module folder structure
+[x] Lecture model
+[x] VideoAsset model
+[x] Lecture repository layer
+[x] Lecture service layer
+[x] Lecture controller layer
+[x] Lecture route layer
+[x] Lecture validation layer
+[x] Lecture queue/job/worker folders
+[x] Lecture helpers folder
+[x] Teacher ID skipped because app has one teacher only
+
+Course Curriculum For Lecture Management
+[x] Backend course curriculum API
+[x] Curriculum response includes course, sections, lessons, and lecture status
+[x] Frontend manage lectures course grid
+[x] Frontend course curriculum page
+[x] Lecture status badge
+[x] Curriculum page folder/component categorization
+[x] Page action logic moved into hook
+[x] UI components kept mostly presentational
+
+AWS / S3 Upload Setup
+[x] AWS account created
+[x] IAM user created for video upload
+[x] S3 bucket created
+[x] S3 IAM policy added
+[x] S3 CORS fixed for browser direct upload
+[x] AWS SDK packages installed
+[x] Backend AWS S3 config
+[x] Env variables added for AWS region, bucket, access key, secret key, upload expiry
+
+Presigned Upload URL Flow
+[x] Backend presigned upload URL validation
+[x] Backend create presigned URL service
+[x] Backend create presigned URL controller
+[x] Backend create presigned URL route
+[x] Lecture and VideoAsset created with upload_pending status
+[x] Original S3 key builder
+[x] Bruno test for presigned URL API
+[x] Frontend presigned URL API/service/mutation
+[x] Upload button opens file picker
+[x] Frontend direct upload to S3 using presigned URL
+[x] Upload progress percentage in frontend
+[x] Only current lesson button shows uploading state
+[x] Local UI shows Uploading while browser uploads to S3
+
+Complete Upload Flow
+[x] Backend complete upload validation
+[x] Backend complete upload repository support
+[x] Backend complete upload service
+[x] Backend complete upload controller
+[x] Backend complete upload route
+[x] Backend verifies uploaded original file with S3 HeadObject
+[x] Backend marks lecture/videoAsset as processing
+[x] Frontend complete upload API/service/mutation
+[x] Processing status emitted through Socket.IO after complete upload
+[x] Frontend socket listener updates curriculum cache without refetch
+
+Queue / Job / Worker Flow
+[x] BullMQ queue created for lecture transcoding
+[x] Transcode job creator
+[x] Transcode worker
+[x] Transcode processor
+[x] Worker imported during backend startup
+[x] Job retry/backoff options
+[x] Error handling marks lecture/videoAsset failed
+[x] Queue/job/worker code cleaned and comments improved
+[x] Ready status emitted through Socket.IO after HLS upload and DB update
+[x] Failed status emitted through Socket.IO only after final retry fails
+
+S3 Download + HLS Processing
+[x] Temp work directory helper
+[x] S3 original video download helper
+[x] Verified original video downloads into Backend/temp folder
+[x] FFmpeg basic HLS helper
+[x] Local master.m3u8 and segment files generated
+[x] HLS S3 base key helper
+[x] HLS folder upload-to-S3 helper
+[x] HLS files uploaded to S3
+[x] hlsMasterKey saved to VideoAsset
+[x] Lecture status marked ready after HLS upload
+[x] VideoAsset status marked ready after HLS upload
+[x] Fresh full upload retest after ready/failed socket status update
+
+Lecture Status Realtime UI
+[x] Backend Socket.IO server setup
+[x] Socket server moved into clean config file
+[x] Lecture socket event helper
+[x] Course-based socket rooms for curriculum pages
+[x] Frontend socket client service
+[x] Frontend lecture status socket hook
+[x] React Query curriculum cache patch without polling/refetch
+[x] Uploading percentage handled locally on frontend
+[x] Processing, ready, and failed shown without page refresh
+
+Secure CloudFront Playback Setup
+[x] CloudFront distribution created for HLS video delivery
+[x] Private S3 bucket connected with CloudFront access
+[x] CloudFront public/private key setup for signed URLs
+[x] Backend CloudFront config added using env variables
+[x] Backend signed HLS playback helper
+[x] Playback access API returns signed CloudFront playlist URL
+[x] Signed query returned for HLS segment requests
+[x] Unsigned CloudFront access blocked successfully
+[x] Signed CloudFront playlist tested successfully
+[x] HLS segment requests tested with 200 response
+
+Lecture Module Cleanup / Reliability
+[x] Cleanup job for expired upload_pending lectures/videoAssets
+[x] Cleanup local Backend/temp transcode folders after successful processing
+
+Lecture Module Architecture Cleanup
+[x] Shared backend playback controller/service used by teacher and student
+[x] Teacher preview playback frontend kept inside teacher-manage feature
+[x] Student watch playback frontend kept inside student-watch feature
+[x] Duplicate teacher-only backend playback files removed
+
+Lecture Module - Immediate Teacher Features
+[x] Secure playback access API using ready lecture hlsMasterKey
+[x] Teacher video preview/watch button for ready lectures
+[x] Frontend HLS player integration for teacher preview
+[x] Basic teacher error toast messages for upload/playback failures
+
+Lecture Module - Later Reliability / Management
+[ ] Cleanup original/HLS S3 files on failed or replaced uploads
+[ ] Replace video flow for an existing lesson
+[ ] Delete lecture/video flow
+[ ] Retry failed processing flow
+
+Lecture Module - Later Advanced Video Improvements
+[ ] Optional processing progress from worker using Redis
+[ ] Store video duration using ffprobe
+[ ] Store video technical metadata
+[ ] Generate multiple HLS qualities: 360p, 720p, 1080p
+[ ] Store HLS variants in VideoAsset.variants
+
+
+============================================================
+LECTURE MODULE - STUDENT SIDE
+============================================================
+
+Student Learning Flow
+[x] Student library page with real course access state
+[x] Student course overview page with curriculum and CTA flow
+[x] Student watch page with player, tabs, and lesson sidebar
+[x] Lesson click opens same course watch page with selected lecture route
+[x] Watch page UI polished for player + content sidebar layout
+
+Student Playback Access
+[x] Backend playback access API
+[x] Enrollment/purchase check before playback
+[x] Preview lesson support for free playable videos
+[x] Check lecture status is ready before giving playback URL
+[x] Generate secure playback URL from hlsMasterKey
+[x] Student course details page shows sections and lessons accordion
+[x] Student clicks lesson and opens video player
+[x] CloudFront distribution for HLS playback
+[x] Private S3 bucket with CloudFront access
+[x] CloudFront signed URL playback flow
+[x] Frontend HLS player integration
+[x] Player loads master.m3u8
+[x] Player plays HLS segments
+[x] Locked lesson UI for non-purchased courses
+[ ] Resume last watched lecture
+[ ] Track watch progress
+[ ] Mark lecture complete
+[ ] Course progress percentage
+
+
+============================================================
+PAYMENT + ENROLLMENT MODULE
+============================================================
+
+Payment Gateway Flow
+[x] Razorpay backend package integration
+[x] PaymentAttempt model
+[x] PaymentAttempt repository layer
+[x] Create order API
+[x] Create order service with duplicate-attempt reuse
+[x] Student checkout frontend integration with Razorpay SDK
+[x] Verify payment API
+[x] Verify payment signature flow
+[x] Report payment failure API
+[x] Payment failure reason and metadata audit trail
+[x] Duplicate purchase protection before creating order
+[x] Duplicate enrollment protection during verification
+[x] Enrollment created after successful payment
+[x] Student access unlocked after successful payment
+[x] Student playback connected to real enrollment access
+[ ] Razorpay webhook integration after deployment
+[ ] Payment retry UX polish
+[ ] Student invoices / receipt history
+[ ] Send invoice / purchase receipt email after successful course purchase
+
+Enrollment Module Foundation
+[x] Enrollment model
+[x] Enrollment repositories
+[x] Active enrollment lookup by user and course
+[x] Active enrollment lookup by user across many courses
+[x] Enrollment lookup by paymentAttemptId
+
+
+============================================================
+PHASE 1 - REMAINING PLATFORM FEATURES
+============================================================
+
+Notifications / Realtime
+[ ] Socket.IO setup for notifications
+[ ] Teacher notification when student purchases course
+[ ] Student notification after enrollment
+[ ] Processing notification when lecture becomes ready
+[ ] In-app notification list
+
+Analytics
+[ ] Teacher dashboard analytics
+[ ] Total courses
+[ ] Total students
+[ ] Total sales
+[ ] Revenue analytics
+[ ] Course-wise performance
+[ ] Lecture watch analytics
+[ ] Student progress analytics
+
+AI Teacher Assistant
+[ ] LangChain setup
+[ ] LangSmith tracing setup
+[ ] Groq model integration
+[ ] Teacher AI chat UI
+[ ] AI tools for course analytics
+[ ] AI tools for lecture/course lookup
+[ ] AI tool calling from chat
+[ ] AI suggestions for course improvement
+
+Deployment / Production Launch
+[ ] Deploy frontend
+[ ] Deploy backend
+[ ] Production environment variables setup
+[ ] Production CORS and cookie verification
+[ ] CloudFront production verification for videos and thumbnails
+[ ] Razorpay production key switch after KYC
+[ ] Razorpay webhook URL wiring after deploy
+[ ] End-to-end production smoke test
+
+Final Phase 1 Polish
+[ ] Global error boundaries review
+[ ] Loading and empty states review
+[ ] Toast messages review
+[ ] Security review for private video playback
+[ ] API response consistency review
+[ ] Folder naming consistency review
+[ ] Final manual testing
+
+
+============================================================
+PHASE 2 - ADVANCED FEATURES
+============================================================
+
+Live Interview / Coding Room
+[ ] One-on-one live video interview
+[ ] WebRTC or video call provider setup
+[ ] Live collaborative code editor
+[ ] Interview room scheduling
+[ ] Interview feedback and scoring
+
+Course Chat
+[ ] Course-specific enrolled student chat
+[ ] Chat room per course
+[ ] Socket.IO chat events
+[ ] Message persistence
+[ ] Student/teacher chat permissions
+
+Advanced LMS Ideas
+[ ] Quiz module
+[ ] Assignments module
+[ ] Certificates
+[ ] Reviews and ratings
+[ ] Coupons and discounts
+[ ] Admin panel
+
+
