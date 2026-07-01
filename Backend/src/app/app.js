@@ -1,4 +1,4 @@
-﻿import express from 'express'
+import express from 'express'
 
 import cors from 'cors'
 
@@ -20,10 +20,16 @@ import routes from '../routes/app-routes.js'
 
 import errorMiddleware from '../middlewares/error-middleware.js'
 
+import { env } from '../config/env.js'
 import { isAllowedClientOrigin } from '../config/client-origins.js'
 import { globalLimiter } from '../middlewares/rate-limit-middleware.js'
 
 const app = express()
+
+// Trust one reverse proxy layer when app runs behind Nginx in production.
+if (env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1)
+}
 
 // Allows local tools without origin and trusted frontend apps with cookies.
 app.use(
@@ -74,3 +80,4 @@ app.use('/api/v1', routes)
 app.use(errorMiddleware)
 
 export default app
+
