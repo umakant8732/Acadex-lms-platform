@@ -1,12 +1,19 @@
-﻿import { env } from '../../../config/env.js'
+import { env } from '../../../config/env.js'
 
-const isProduction = env.NODE_ENV === 'production'
+const defaultCookieSecure = env.NODE_ENV === 'production'
 
-// Uses strict cookie rules in prod so cross-site frontend auth keeps working.
+// Lets us run HTTP on raw EC2 IP now and switch to HTTPS later from env only.
+const isCookieSecure = env.COOKIE_SECURE
+  ? env.COOKIE_SECURE === 'true'
+  : defaultCookieSecure
+
+// Keep same-site simple for same-origin deploys unless we explicitly need cross-site cookies.
+const cookieSameSite = env.COOKIE_SAME_SITE || (isCookieSecure ? 'none' : 'lax')
+
 export const cookieOptions = {
   httpOnly: true,
-  secure: isProduction,
-  sameSite: isProduction ? 'none' : 'lax',
+  secure: isCookieSecure,
+  sameSite: cookieSameSite,
   path: '/'
 }
 

@@ -1,4 +1,4 @@
-﻿import dotenv from 'dotenv'
+import dotenv from 'dotenv'
 
 import { z } from 'zod'
 
@@ -25,6 +25,17 @@ const envSchema = z.object({
   CLIENT_URL: z.string(),
 
   CLIENT_URLS: z.string().optional(),
+
+  COOKIE_SECURE: z.enum([
+    'true',
+    'false'
+  ]).optional(),
+
+  COOKIE_SAME_SITE: z.enum([
+    'lax',
+    'strict',
+    'none'
+  ]).optional(),
 
   REDIS_URL: z.string(),
 
@@ -63,6 +74,14 @@ const envSchema = z.object({
       code: z.ZodIssueCode.custom,
       path: ['CLOUDFRONT_PRIVATE_KEY'],
       message: 'Provide CLOUDFRONT_PRIVATE_KEY or CLOUDFRONT_PRIVATE_KEY_PATH'
+    })
+  }
+
+  if (data.COOKIE_SAME_SITE === 'none' && data.COOKIE_SECURE === 'false') {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['COOKIE_SAME_SITE'],
+      message: 'COOKIE_SAME_SITE=none requires COOKIE_SECURE=true'
     })
   }
 })
