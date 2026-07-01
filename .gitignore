@@ -41,3 +41,8 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Local secret notes
+PROJECT_SECRET_INVENTORY.txt
+PROD_ENV_BACKEND.txt
+

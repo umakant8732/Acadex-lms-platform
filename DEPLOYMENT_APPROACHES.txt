@@ -1,0 +1,300 @@
+﻿ACADEX DEPLOYMENT APPROACHES
+Updated: 2026-07-01
+
+Goal
+This document compares three deployment approaches for the Acadex LMS project:
+1. Full EC2 deployment (frontend + backend on the same EC2)
+2. S3/CloudFront frontend + EC2 backend
+3. Vercel frontend + EC2 backend
+
+The purpose is to choose the best deployment model for the current stage of the project and to keep a clear plan for future upgrades.
+
+====================================================================
+APPROACH 1 - FULL EC2 DEPLOYMENT
+Frontend + Backend + Worker + MongoDB + Redis on the same EC2
+====================================================================
+
+Architecture
+- Frontend build is served by Nginx
+- Backend API runs on Node.js at an internal port such as 5000
+- Background worker runs as a separate Node.js process
+- MongoDB runs on the same EC2 and is private only
+- Redis runs on the same EC2 and is private only
+- Videos and thumbnails continue to use AWS S3 + CloudFront
+- Nginx handles reverse proxy, frontend static serving, and later SSL
+
+Why this approach is good for us now
+- Lowest setup complexity
+- Best for first real deployment from scratch
+- Easy debugging because everything is on one machine
+- Cookies, auth, API calls, and sockets are easier to manage
+- Good fit for a portfolio and learning deployment phase
+- Low monthly cost compared to multi-service architecture
+
+Why we would choose this first
+Our project already offloads heavy media delivery to S3 and CloudFront. That means the EC2 server mainly handles:
+- API requests
+- authentication
+- payments
+- socket connections
+- background jobs
+- FFmpeg processing
+This makes a single EC2 deployment practical for the current stage.
+
+Pros
+- Simple architecture
+- One server to manage
+- Easy local-to-production mental model
+- Easier same-domain setup with Nginx
+- Less CORS complexity
+- Easier cookie and session handling
+- Good for deployment learning and resume credibility
+
+Cons
+- API, worker, MongoDB, and Redis share the same machine resources
+- Heavy FFmpeg transcode jobs can affect server performance
+- Less scalable than split architectures
+- Harder to scale frontend and backend independently
+- If the machine has issues, all application layers are affected
+
+When this approach is best
+- First live release
+- Budget-sensitive deployment
+- Fastest path to production
+- Projects with moderate traffic
+- Full-stack learning phase
+
+Complete deployment steps from scratch
+1. Launch an Ubuntu EC2 instance
+2. Create a key pair and download the .pem file
+3. Open security group ports: 22, 80, 443
+4. SSH into the instance
+5. Install system packages: Nginx, Git, curl, build tools
+6. Install Node.js LTS
+7. Install MongoDB and bind it to localhost only
+8. Install Redis and bind it to localhost only
+9. Clone the GitHub repository into the server
+10. Create server directories such as:
+   - /var/www/acadex/backend
+   - /var/www/acadex/frontend
+   - /var/www/acadex/secure
+   - /var/log/acadex
+11. Add backend production env file
+12. Add CloudFront private key file or env secret
+13. Run npm install in Backend
+14. Run npm install in Frontend
+15. Add frontend production env file
+16. Build the frontend using Vite
+17. Configure the backend API process
+18. Configure the backend worker process
+19. Create systemd services for:
+   - acadex-api
+   - acadex-worker
+20. Configure Nginx to:
+   - serve frontend build files
+   - proxy /api to Node.js backend
+   - proxy /socket.io for WebSocket support
+   - support SPA routing
+21. Start and enable systemd services
+22. Start and test Nginx
+23. Test backend health route
+24. Test frontend page load
+25. Test login, payment, thumbnails, lecture upload, playback, and sockets
+26. Add domain and SSL later when stable
+
+Operational notes
+- Best to use systemd instead of keeping processes in a terminal
+- Keep MongoDB, Redis, and backend ports private
+- Only Nginx should face the public internet
+- Good for free-tier or low-cost first deployment
+
+====================================================================
+APPROACH 2 - S3/CLOUDFRONT FRONTEND + EC2 BACKEND
+Static frontend on S3/CloudFront, backend services on EC2
+====================================================================
+
+Architecture
+- Frontend build is uploaded to S3
+- CloudFront serves the frontend as a CDN
+- Backend API runs on EC2 behind Nginx
+- Background worker runs on the same EC2
+- MongoDB and Redis run on the same EC2 or another private server
+- Videos and thumbnails also continue to use S3 + CloudFront
+
+Why this approach exists
+This is a more standard split for applications with a static frontend and a custom API backend. It reduces frontend load on the EC2 machine and improves static delivery speed.
+
+Why we are not choosing this first
+Even though this approach is professional and scalable, it adds extra complexity for:
+- CORS
+- cookie behavior
+- API domain setup
+- frontend CDN invalidation
+- CloudFront configuration
+For our current auth-heavy app, this is not the easiest first deployment.
+
+Pros
+- Very fast frontend delivery through CDN
+- Frontend is separated from backend compute
+- Static frontend hosting can be cheap and scalable
+- Backend server focuses only on APIs, jobs, database access, and sockets
+- Better long-term separation of concerns
+
+Cons
+- More setup complexity than full EC2
+- Requires handling separate frontend and backend origins
+- Cookies and auth need more careful configuration
+- CORS must be configured correctly
+- CloudFront invalidation and cache behavior need management
+- Debugging can be slower because frontend and backend are deployed separately
+
+When this approach is best
+- When frontend traffic grows
+- When you want better global frontend delivery
+- When you already have stable auth and domain setup
+- When you want infrastructure closer to typical production separation
+
+Complete deployment steps from scratch
+1. Launch an Ubuntu EC2 instance for backend services
+2. Create a key pair and SSH access
+3. Open ports 22, 80, 443 in the EC2 security group
+4. Install Nginx, Git, Node.js, MongoDB, and Redis on EC2
+5. Clone the backend repository or full monorepo to the server
+6. Add backend production env file
+7. Add CloudFront private key file or env secret
+8. Install backend dependencies
+9. Configure backend API and worker as separate systemd services
+10. Configure Nginx to expose only the backend API and WebSocket routes
+11. Build the frontend locally or in CI
+12. Create an S3 bucket for frontend hosting assets
+13. Upload the frontend dist build to S3
+14. Create a CloudFront distribution for the frontend bucket
+15. Point frontend domain to the CloudFront distribution
+16. Configure frontend env values to use the backend API domain
+17. Configure backend CORS to allow the frontend domain
+18. Test cookies, login, payment, playback, and socket connections
+19. Add SSL to the backend domain using Nginx and Certbot
+20. Configure cache invalidation strategy for frontend updates
+
+Operational notes
+- Best to use a dedicated frontend domain such as app.domain.com
+- Best to use a dedicated backend domain such as api.domain.com
+- Frontend deployments are static and separate from API deployments
+- Good second-stage production architecture after a stable first release
+
+====================================================================
+APPROACH 3 - VERCEL FRONTEND + EC2 BACKEND
+Frontend on Vercel, backend services on EC2
+====================================================================
+
+Architecture
+- Frontend is deployed on Vercel
+- Backend API runs on EC2 behind Nginx
+- Worker runs on EC2 as a separate process
+- MongoDB and Redis run on the same EC2 or another private server
+- Videos and thumbnails continue to use S3 + CloudFront
+- Frontend uses backend public domain or subdomain for API and sockets
+
+Why this approach is attractive
+This approach gives very fast frontend deployment and good developer experience. UI changes become very easy to publish without touching the EC2 server.
+
+Why we may choose this later
+This is a very good modern setup, but it requires backend domain, SSL, cookies, and CORS to be correctly configured. It is cleaner than full EC2 for frontend iteration, but stricter to set up safely.
+
+Pros
+- Excellent frontend deployment experience
+- Automatic frontend builds and previews from GitHub
+- Good CDN delivery for frontend assets
+- Frontend can be updated independently from backend
+- Nice choice for iterative UI development
+
+Cons
+- Backend still needs proper EC2 setup and monitoring
+- Requires separate frontend and backend origins
+- Cookie and auth setup is more sensitive
+- HTTPS and custom backend domain are strongly recommended
+- WebSocket configuration must be tested carefully
+- Slightly more complex than full EC2 for first deployment
+
+When this approach is best
+- When frontend changes happen frequently
+- When you want preview deployments for UI work
+- When backend infrastructure is stable already
+- When you are comfortable handling CORS, cookies, and domain-based auth
+
+Complete deployment steps from scratch
+1. Launch an Ubuntu EC2 instance for backend services
+2. Create a key pair and SSH access
+3. Open ports 22, 80, 443 in the EC2 security group
+4. Install Nginx, Git, Node.js, MongoDB, and Redis on EC2
+5. Clone the repository to the server
+6. Add backend production env file
+7. Add CloudFront private key file or env secret
+8. Install backend dependencies
+9. Configure backend API and worker as separate systemd services
+10. Configure Nginx to expose the backend API and WebSocket routes
+11. Create a backend domain or subdomain such as api.domain.com
+12. Add SSL using Nginx and Certbot
+13. Push frontend code to GitHub
+14. Import the frontend project into Vercel
+15. Add Vercel env variables such as:
+   - VITE_API_URL
+   - VITE_SOCKET_URL
+16. Deploy the frontend on Vercel
+17. Configure backend CORS to allow the Vercel domain and custom frontend domain
+18. Test login, refresh token flow, payment, protected routes, and sockets
+19. If needed, later add a custom domain to Vercel for the frontend
+
+Operational notes
+- Best when backend uses a proper HTTPS domain instead of a raw EC2 IP
+- Better developer experience than S3 for frontend releases
+- Strong option after backend deployment is already stable
+
+====================================================================
+FINAL COMPARISON
+====================================================================
+
+1. Full EC2
+Best for:
+- First deployment
+- Lower complexity
+- Lower operational overhead
+- Easy full-stack debugging
+Main tradeoff:
+- Everything shares one machine
+
+2. S3/CloudFront + EC2
+Best for:
+- Better frontend CDN delivery
+- More production-style frontend separation
+Main tradeoff:
+- More infrastructure complexity
+
+3. Vercel + EC2
+Best for:
+- Fast frontend iteration
+- Better frontend developer experience
+- Easy UI deployments
+Main tradeoff:
+- Requires stronger backend domain, SSL, and auth setup
+
+====================================================================
+OUR CURRENT RECOMMENDATION
+====================================================================
+
+Recommended now: APPROACH 1 - FULL EC2 DEPLOYMENT
+
+Why this is the best fit right now
+- It is the fastest way to get Acadex live
+- It keeps cookies, auth, and sockets simpler
+- It is easier to debug the first production release
+- It avoids premature infrastructure complexity
+- Media delivery is already offloaded to S3 and CloudFront
+- It gives strong learning value for real Linux/Nginx/Node deployment
+
+Recommended future upgrade path
+1. Launch first stable version on full EC2
+2. Validate auth, payments, uploads, playback, and worker stability
+3. Add domain and SSL
+4. Later move frontend to Vercel or S3/CloudFront if needed
+5. Later move MongoDB/Redis to dedicated infrastructure if traffic grows
