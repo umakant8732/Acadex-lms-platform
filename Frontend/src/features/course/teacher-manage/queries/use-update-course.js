@@ -19,6 +19,10 @@ export const useUpdateCourse = () => {
       queryClient.invalidateQueries({
         queryKey: lectureQueryKeys.manageCourses
       })
+
+      queryClient.invalidateQueries({
+        queryKey: lectureQueryKeys.courseCurriculum(variables.courseId)
+      })
     }
   })
 }

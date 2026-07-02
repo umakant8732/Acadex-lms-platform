@@ -1,10 +1,11 @@
-﻿import { createServer } from 'node:http'
+import { createServer } from 'node:http'
 
 import app from './app.js'
 import { env } from '../config/env.js'
 import { connectDB } from '../config/database.js'
 import { connectRedis } from '../config/redis.js'
 import { setupSocketServer } from '../config/socket-server.js'
+import { startLectureStatusSocketSubscriber } from '../modules/lecture/sockets/lecture-status-pubsub.js'
 import { logger } from '../utils/logger.js'
 
 const startServer = async () => {
@@ -16,6 +17,9 @@ const startServer = async () => {
 
     // Attach Socket.IO to same HTTP server.
     setupSocketServer(httpServer)
+
+    // Listen to worker status events and fan them out to connected browsers.
+    await startLectureStatusSocketSubscriber()
 
     httpServer.listen(env.PORT, () => {
       logger.info(`Server running on port ${env.PORT}`)

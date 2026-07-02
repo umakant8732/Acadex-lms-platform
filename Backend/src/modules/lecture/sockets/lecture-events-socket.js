@@ -1,4 +1,3 @@
-
 import { getSocketServer } from '../../../config/socket-store.js'
 import { logger } from '../../../utils/logger.js'
 
@@ -14,9 +13,8 @@ export const getLectureCourseRoom = courseId => {
   return `lecture-course:${courseId}`
 }
 
-// Emits latest lecture status to teacher watching same course.
-// DB is still main source of truth, socket only updates UI in realtime.
-export const emitLectureStatusChanged = ({
+// Normalizes ids because frontend cache matching always compares string ids.
+export const buildLectureStatusSocketPayload = ({
   courseId,
   lessonId,
   lectureId,
@@ -25,8 +23,27 @@ export const emitLectureStatusChanged = ({
   hlsMasterKey = '',
   errorMessage = ''
 }) => {
-  // Required ids help frontend update exact lesson without refetching.
   if (!courseId || !lessonId || !lectureId || !videoAssetId || !status) {
+    return null
+  }
+
+  return {
+    courseId: String(courseId),
+    lessonId: String(lessonId),
+    lectureId: String(lectureId),
+    videoAssetId: String(videoAssetId),
+    status,
+    hlsMasterKey,
+    errorMessage
+  }
+}
+
+// Emits latest lecture status to teacher watching same course.
+// DB is still main source of truth, socket only updates UI in realtime.
+export const emitLectureStatusChanged = payload => {
+  const socketPayload = buildLectureStatusSocketPayload(payload)
+
+  if (!socketPayload) {
     logger.warn('Lecture status socket event skipped: missing required payload')
     return
   }
@@ -34,17 +51,6 @@ export const emitLectureStatusChanged = ({
   try {
     // Get active Socket.IO server created during server startup.
     const io = getSocketServer()
-
-    // Convert Mongo ObjectIds into strings because frontend compares strings.
-    const socketPayload = {
-      courseId: String(courseId),
-      lessonId: String(lessonId),
-      lectureId: String(lectureId),
-      videoAssetId: String(videoAssetId),
-      status,
-      hlsMasterKey,
-      errorMessage
-    }
 
     // Emit only to current course room, not every connected user.
     const roomName = getLectureCourseRoom(socketPayload.courseId)

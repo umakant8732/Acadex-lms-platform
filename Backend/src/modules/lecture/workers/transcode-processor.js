@@ -12,7 +12,7 @@ import { transcodeVideoToHls } from '../helpers/transcode-video-to-hls.js'
 import { buildHlsS3BaseKey } from '../helpers/build-s3-key.js'
 import { uploadHlsFolderToS3 } from '../helpers/upload-hls-folder-to-s3.js'
 import { removeTranscodeWorkDir } from '../helpers/remove-transcode-work-dir.js'
-import { emitLectureStatusChanged } from '../sockets/lecture-events-socket.js'
+import { publishLectureStatusChanged } from '../sockets/lecture-status-pubsub.js'
 
 const isFinalJobAttempt = job => {
   const maxAttempts = job.opts?.attempts ?? 1
@@ -87,10 +87,8 @@ export const processLectureTranscodeJob = async job => {
       `Lecture video ready: lecture=${lectureId}, asset=${videoAssetId}`
     )
 
-
-    // Notify current course page after HLS key is saved and lecture is ready.
-    // Frontend uses this event to show Ready without refreshing curriculum API.
-    emitLectureStatusChanged({
+    // Worker cannot emit socket directly, so it publishes via Redis.
+    await publishLectureStatusChanged({
       courseId,
       lessonId,
       lectureId: updatedLecture._id,
@@ -141,9 +139,8 @@ export const processLectureTranscodeJob = async job => {
       status: LECTURE_STATUS.FAILED
     })
 
-    // Notify current course page after DB stores final failed status.
-    // Frontend uses this event to show Failed without manual refresh.
-    emitLectureStatusChanged({
+    // Worker publishes failed state through Redis so current page updates live.
+    await publishLectureStatusChanged({
       courseId,
       lessonId,
       lectureId: failedLecture._id,
