@@ -1,6 +1,7 @@
-﻿# Workspace secrets and generated folders
+# Workspace secrets and generated folders
 logs/
 secreat-credentials/
+secret-credentials/
 
 # Backend generated media and keys
 Backend/logs/
@@ -42,10 +43,12 @@ Thumbs.db
 *.sln
 *.sw?
 
-# Local secret notes
+# Local secret notes and production env snapshots
 PROJECT_SECRET_INVENTORY.txt
+PROJECT_SECRET_*.txt
 PROD_ENV_BACKEND.txt
-
+PROD_ENV_BACKEND.TXT
+PROD_ENV_*.txt
 
 # Local SSH and private key files
 *.pem

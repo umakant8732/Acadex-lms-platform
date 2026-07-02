@@ -1,5 +1,5 @@
-﻿ACADEX PLATFORM ROADMAP
-Updated: 2026-07-01
+ACADEX PLATFORM ROADMAP
+Updated: 2026-07-02
 
 Legend:
 [x] Completed / already built
@@ -18,7 +18,10 @@ Platform Shell / Shared UI
 [x] Student navbar responsive for mobile and tablet
 [x] Teacher dashboard/sidebar responsive with mobile toggle flow
 [x] Shared folder cleanup and categorization pass completed
-[ ] Final deployment and production environment verification
+[x] EC2 single-server deployment approach finalized
+[x] Domain connected: acadexlearning.xyz + www.acadexlearning.xyz
+[x] HTTPS enabled with Let's Encrypt / Certbot
+[x] Final deployment and production environment verification
 
 Course Module - Teacher Side
 [x] Backend course model, repository, service, controller, route flow
@@ -49,6 +52,7 @@ Course Module - Teacher Side
 [x] Thumbnail replace flow from manage courses table row
 [x] Old thumbnail cleanup on replace (best effort delete)
 [x] CloudFront public thumbnails behavior configured successfully
+[ ] Thumbnail compression / resize optimization before final save
 [ ] Remove thumbnail flow
 
 Course Module - Public / Student Surfaces
@@ -309,14 +313,14 @@ AI Teacher Assistant
 [ ] AI suggestions for course improvement
 
 Deployment / Production Launch
-[ ] Deploy frontend
-[ ] Deploy backend
-[ ] Production environment variables setup
-[ ] Production CORS and cookie verification
-[ ] CloudFront production verification for videos and thumbnails
+[x] Deploy frontend
+[x] Deploy backend
+[x] Production environment variables setup
+[x] Production CORS and cookie verification
+[x] CloudFront production verification for videos and thumbnails
 [ ] Razorpay production key switch after KYC
-[ ] Razorpay webhook URL wiring after deploy
-[ ] End-to-end production smoke test
+[ ] Razorpay webhook URL wiring
+[x] End-to-end production smoke test
 
 Final Phase 1 Polish
 [ ] Global error boundaries review
@@ -353,5 +357,3 @@ Advanced LMS Ideas
 [ ] Reviews and ratings
 [ ] Coupons and discounts
 [ ] Admin panel
-
-

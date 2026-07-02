@@ -1,0 +1,857 @@
+Acadex EC2 Deployment Guide
+
+This file explains the exact deployment approach we used for Acadex and the
+step-by-step flow from scratch. It includes the reason behind each step,
+the commands we ran, and what each command does.
+
+===========================================================================
+1. DEPLOYMENT APPROACH WE USED
+===========================================================================
+
+We used this production setup:
+
+1. One Ubuntu EC2 instance
+   - Frontend and backend both run through the same EC2 instance.
+   - This keeps deployment simple and cost low.
+
+2. Nginx as the public entry point
+   - Nginx serves the frontend static build.
+   - Nginx proxies backend API and socket requests to Node.js running on
+     internal port 5000.
+
+3. Backend on Node.js
+   - Backend runs as a Node.js app.
+   - It is not exposed directly on the internet in final production.
+   - Nginx talks to it through 127.0.0.1:5000.
+
+4. Worker as a separate PM2 process
+   - Lecture video processing runs in a separate worker process.
+   - This keeps long video jobs away from the main API process.
+
+5. PM2 for process management
+   - PM2 keeps backend and worker running in background.
+   - PM2 restarts them on reboot.
+
+6. MongoDB Atlas for production database
+   - We did not keep MongoDB locally on EC2 in final production.
+   - Atlas reduced server setup complexity and made deployment easier.
+
+7. Redis on EC2
+   - Redis runs locally on the EC2 machine.
+   - Used for queues, pub/sub, OTP/session-related flows as needed.
+
+8. S3 + CloudFront for media
+   - S3 stores thumbnails and uploaded media.
+   - CloudFront serves playback content securely.
+
+9. GoDaddy DNS + Let's Encrypt SSL
+   - Domain points to EC2 public IP.
+   - Certbot configures HTTPS in Nginx.
+
+In one line:
+Frontend static files + Nginx + Node backend + PM2 worker + Redis on one EC2,
+MongoDB on Atlas, media on S3/CloudFront, HTTPS via Certbot.
+
+===========================================================================
+2. WHY WE CHOSE THIS APPROACH
+===========================================================================
+
+Why same EC2 for frontend and backend?
+
+1. Easier to deploy
+   - One server
+   - One public IP
+   - One Nginx config
+   - One domain setup
+
+2. Lower cost
+   - Better for free tier / low-cost learning and portfolio deployment
+
+3. Good enough for current scale
+   - For a personal LMS project this is a practical production-style setup
+
+4. Still production-like
+   - Reverse proxy
+   - Background worker
+   - HTTPS
+   - Managed database
+   - Object storage and CDN
+
+===========================================================================
+3. THINGS THAT MUST EXIST BEFORE DEPLOYMENT
+===========================================================================
+
+Before starting, these should already exist:
+
+1. GitHub repository with latest code pushed
+2. AWS account
+3. EC2 instance permissions
+4. S3 bucket already created
+5. CloudFront distribution already created
+6. MongoDB Atlas cluster created
+7. MongoDB Atlas user created
+8. MongoDB Atlas IP access updated
+9. Razorpay keys ready
+10. Gmail app password or mail credentials ready
+11. CloudFront private key file ready
+12. Domain purchased and DNS editable
+
+===========================================================================
+4. LOCAL PREP BEFORE TOUCHING EC2
+===========================================================================
+
+Make sure code is pushed to GitHub.
+
+Typical local commands:
+
+git add .
+git commit -m "deploy: production ready changes"
+git push origin main
+
+What these do:
+
+git add .
+- stages local changes for commit
+
+git commit -m "..."
+- creates a new git snapshot with a message
+
+git push origin main
+- uploads latest local commit to GitHub
+
+Without this, EC2 will pull old code.
+
+===========================================================================
+5. CREATE EC2 INSTANCE
+===========================================================================
+
+EC2 settings we used:
+
+1. Region: ap-south-1
+2. AMI: Ubuntu Server
+3. Instance type: t3.micro
+4. Auto-assign public IP: Enabled
+5. Storage: default root volume was enough for initial deployment
+
+Security group inbound rules:
+
+1. SSH 22
+   - During setup: sometimes kept open temporarily for convenience
+   - Final recommended: My IP only
+
+2. HTTP 80
+   - Source: 0.0.0.0/0
+
+3. HTTPS 443
+   - Source: 0.0.0.0/0
+
+Important:
+- Port 5000 should not remain public in final production.
+- Backend should be accessed through Nginx, not directly from internet.
+
+===========================================================================
+6. CONNECT TO EC2
+===========================================================================
+
+We connected using EC2 Instance Connect / SSH terminal.
+
+If SSH did not work, common reasons were:
+
+1. No public IP assigned
+2. Security group did not allow port 22
+3. Source IP was restricted to an old IP
+
+During setup, SSH was sometimes opened to Anywhere IPv4 temporarily, then
+the plan was to lock it back to My IP later.
+
+===========================================================================
+7. BASE SERVER SETUP
+===========================================================================
+
+Run these commands after login:
+
+sudo apt update
+
+What it does:
+- refreshes the Ubuntu package index
+- makes sure apt knows latest package versions
+
+Then install Node.js setup script:
+
+curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
+
+What it does:
+- downloads NodeSource setup script
+- adds Node.js 24 repository to Ubuntu
+- prepares apt so we can install nodejs package
+
+Then install the main server packages:
+
+sudo apt install -y nodejs nginx redis-server git
+
+What it does:
+- nodejs: runs backend and build tools
+- nginx: serves frontend and proxies backend
+- redis-server: runs local Redis
+- git: lets EC2 pull project from GitHub
+
+Verify installs:
+
+node -v
+npm -v
+
+What these do:
+- confirm Node.js and npm installed correctly
+
+Enable and start services:
+
+sudo systemctl enable --now nginx
+sudo systemctl enable --now redis-server
+
+What these do:
+- enable service at boot
+- start service immediately now
+
+Check Redis:
+
+redis-cli ping
+
+Expected output:
+PONG
+
+Meaning:
+- Redis is alive and reachable locally
+
+Install PM2 globally:
+
+sudo npm install -g pm2
+
+What it does:
+- installs PM2 globally for background process management
+
+===========================================================================
+8. CLONE PROJECT ON EC2
+===========================================================================
+
+Go to home folder:
+
+cd ~
+
+Clone project:
+
+git clone https://github.com/<your-username>/<your-repo>.git
+
+Then:
+
+cd Acadex-lms-platform
+
+What this does:
+- downloads your repository to the EC2 machine
+
+Whenever new code is pushed later:
+
+git pull origin main
+
+What it does:
+- fetches latest GitHub changes onto EC2
+
+===========================================================================
+9. BACKEND DEPENDENCIES
+===========================================================================
+
+Move into backend:
+
+cd ~/Acadex-lms-platform/Backend
+
+Install dependencies:
+
+npm install
+
+What it does:
+- downloads all backend packages from package.json
+- creates node_modules for backend
+
+===========================================================================
+10. BACKEND ENV FILE
+===========================================================================
+
+Create or open backend env:
+
+nano ~/Acadex-lms-platform/Backend/.env
+
+This file stores production secrets and config.
+
+Final production style values look like this:
+
+PORT=5000
+NODE_ENV=production
+MONGO_URI=mongodb+srv://<db_user>:<db_password>@<cluster-url>/acadex?retryWrites=true&w=majority&appName=<app-name>
+
+JWT_ACCESS_SECRET=<your_access_secret>
+JWT_REFRESH_SECRET=<your_refresh_secret>
+ACCESS_TOKEN_EXPIRES_IN=1d
+REFRESH_TOKEN_EXPIRES_IN=7d
+
+CLIENT_URL=https://acadexlearning.xyz
+CLIENT_URLS=https://www.acadexlearning.xyz
+
+COOKIE_SECURE=true
+COOKIE_SAME_SITE=lax
+
+REDIS_URL=redis://127.0.0.1:6379
+
+EMAIL_USER=<your_email>
+EMAIL_PASS=<your_app_password>
+
+AWS_REGION=ap-south-1
+AWS_ACCESS_KEY_ID=<your_aws_access_key_id>
+AWS_SECRET_ACCESS_KEY=<your_aws_secret_access_key>
+AWS_S3_BUCKET_NAME=<your_bucket_name>
+AWS_S3_UPLOAD_URL_EXPIRES_IN=300
+
+RAZORPAY_KEY_ID=<your_razorpay_key_id>
+RAZORPAY_KEY_SECRET=<your_razorpay_key_secret>
+RAZORPAY_WEBHOOK_SECRET=<your_webhook_secret>
+
+CLOUDFRONT_DOMAIN=<your_cloudfront_domain>
+CLOUDFRONT_KEY_PAIR_ID=<your_cloudfront_key_pair_id>
+CLOUDFRONT_PRIVATE_KEY_PATH=secure/cloudfront-private-key.pem
+CLOUDFRONT_URL_EXPIRES_IN=3600
+
+Why these matter:
+
+PORT
+- backend listens on this port internally
+
+NODE_ENV
+- enables production behavior
+
+MONGO_URI
+- connects backend to MongoDB Atlas
+
+CLIENT_URL / CLIENT_URLS
+- allowed frontend origins for cookies and CORS
+
+COOKIE_SECURE / COOKIE_SAME_SITE
+- controls auth cookie behavior
+
+REDIS_URL
+- backend and worker connect to local Redis
+
+AWS and CloudFront values
+- needed for uploads, secure playback, thumbnails, and signed URLs
+
+===========================================================================
+11. CLOUDFRONT PRIVATE KEY FILE
+===========================================================================
+
+Create secure directory:
+
+mkdir -p ~/Acadex-lms-platform/Backend/secure
+
+Open key file:
+
+nano ~/Acadex-lms-platform/Backend/secure/cloudfront-private-key.pem
+
+Paste the full private key and save.
+
+Lock file permissions:
+
+chmod 600 ~/Acadex-lms-platform/Backend/secure/cloudfront-private-key.pem
+
+What these do:
+
+mkdir -p
+- creates folder if missing
+
+nano ...
+- opens file editor
+
+chmod 600
+- only current user can read/write the private key
+
+Without correct private key path, secure CloudFront playback breaks.
+
+===========================================================================
+12. MONGODB ATLAS IP ACCESS
+===========================================================================
+
+Before backend can connect to Atlas, Atlas must allow the EC2 server IP.
+
+In Atlas IP Access List:
+
+Add EC2 public IP
+
+Why:
+- Atlas blocks unknown IPs by default
+- backend connection fails until EC2 public IP is whitelisted
+
+===========================================================================
+13. TEST BACKEND DIRECTLY BEFORE NGINX
+===========================================================================
+
+From Backend folder:
+
+npm run dev
+
+What it does:
+- starts backend with nodemon
+- useful for first validation
+
+Later for production we switch to PM2, not nodemon.
+
+You can also test local health from the server:
+
+curl http://127.0.0.1:5000/api/v1/health
+
+What it does:
+- checks whether backend is actually listening on port 5000
+- confirms Node app is alive before wiring Nginx
+
+===========================================================================
+14. FRONTEND DEPENDENCIES
+===========================================================================
+
+Go into frontend:
+
+cd ~/Acadex-lms-platform/Frontend
+
+Install dependencies:
+
+npm install
+
+What it does:
+- downloads frontend packages from package.json
+
+===========================================================================
+15. FRONTEND PRODUCTION ENV
+===========================================================================
+
+Create or open:
+
+nano ~/Acadex-lms-platform/Frontend/.env.production
+
+Final production values:
+
+VITE_API_URL=https://acadexlearning.xyz/api/v1
+VITE_SOCKET_URL=https://acadexlearning.xyz
+
+Why:
+- Vite reads .env.production at build time
+- these values get baked into the built frontend files
+
+Important concept:
+- frontend does not "read" .env.production at runtime in browser
+- Vite uses it during npm run build
+- if this file changes, you must rebuild frontend
+
+===========================================================================
+16. BUILD FRONTEND
+===========================================================================
+
+From Frontend folder:
+
+npm run build
+
+What it does:
+- creates optimized production static files
+- output goes into Frontend/dist
+
+===========================================================================
+17. COPY FRONTEND BUILD TO NGINX WEB ROOT
+===========================================================================
+
+Create target folder:
+
+sudo mkdir -p /var/www/acadex-frontend
+
+Clear old build:
+
+sudo rm -rf /var/www/acadex-frontend/*
+
+Copy new build:
+
+sudo cp -r ~/Acadex-lms-platform/Frontend/dist/* /var/www/acadex-frontend/
+
+What these do:
+
+mkdir -p
+- creates final web root folder if missing
+
+rm -rf ...
+- removes old static files
+
+cp -r ...
+- copies new built frontend into Nginx-served folder
+
+===========================================================================
+18. NGINX CONFIG
+===========================================================================
+
+Open Nginx site config:
+
+sudo nano /etc/nginx/sites-available/default
+
+Use a config like this:
+
+server {
+    listen 80;
+    server_name acadexlearning.xyz www.acadexlearning.xyz;
+
+    root /var/www/acadex-frontend;
+    index index.html;
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:5000/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /socket.io/ {
+        proxy_pass http://127.0.0.1:5000/socket.io/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+
+Why this config:
+
+root /var/www/acadex-frontend
+- serve frontend static files from here
+
+location /api/
+- forward API requests to backend
+
+location /socket.io/
+- forward Socket.IO requests to backend with websocket upgrade headers
+
+try_files $uri $uri/ /index.html
+- allows React Router deep links to work on refresh
+
+Test config:
+
+sudo nginx -t
+
+What it does:
+- checks syntax before reload
+
+Reload Nginx:
+
+sudo systemctl reload nginx
+
+What it does:
+- applies new config without restarting whole server
+
+===========================================================================
+19. PM2 PRODUCTION PROCESS SETUP
+===========================================================================
+
+Go to backend:
+
+cd ~/Acadex-lms-platform/Backend
+
+Start backend process:
+
+pm2 start npm --name acadex-backend -- start
+
+What it does:
+- PM2 launches "npm start"
+- package.json maps that to:
+  node src/app/server.js
+
+Start worker process:
+
+pm2 start npm --name acadex-worker -- run start:worker
+
+What it does:
+- PM2 launches "npm run start:worker"
+- package.json maps that to:
+  node src/app/worker.js
+
+Check both:
+
+pm2 list
+
+What it does:
+- shows running PM2 processes
+- confirms backend and worker are online
+
+===========================================================================
+20. SAVE PM2 STATE AND AUTO-START ON REBOOT
+===========================================================================
+
+Save current PM2 process list:
+
+pm2 save
+
+What it does:
+- stores current running app list
+- PM2 can restore the same apps after reboot
+
+Enable PM2 startup through systemd:
+
+sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u ubuntu --hp /home/ubuntu
+
+What it does:
+- creates a systemd service for PM2
+- tells Ubuntu to auto-restore PM2 apps after reboot
+
+Reboot server:
+
+sudo reboot
+
+After reconnect:
+
+pm2 list
+
+Why we checked again:
+- to confirm backend and worker came back automatically after reboot
+
+===========================================================================
+21. DOMAIN DNS SETUP
+===========================================================================
+
+In GoDaddy DNS records:
+
+1. A record
+   Host: @
+   Value: <EC2 public IP>
+
+2. CNAME record
+   Host: www
+   Value: acadexlearning.xyz
+
+3. Remove old parked A record if it exists
+
+Why:
+- A record points root domain to EC2
+- CNAME points www to root domain
+- parked record causes conflicts
+
+===========================================================================
+22. INSTALL SSL TOOLS
+===========================================================================
+
+Install Certbot:
+
+sudo apt install certbot python3-certbot-nginx -y
+
+What it does:
+- certbot: gets Let's Encrypt certificates
+- python3-certbot-nginx: lets Certbot edit Nginx config automatically
+
+===========================================================================
+23. ISSUE SSL CERTIFICATE
+===========================================================================
+
+Run:
+
+sudo certbot --nginx -d acadexlearning.xyz -d www.acadexlearning.xyz
+
+What it does:
+
+1. Verifies domain ownership
+2. Requests SSL certificate from Let's Encrypt
+3. Installs certificate into Nginx
+4. Optionally sets HTTP to HTTPS redirect
+
+During prompts:
+
+1. enter email
+2. agree to terms
+3. EFF emails can be No
+4. choose redirect to HTTPS
+
+After success, Certbot:
+- writes certificate files
+- updates Nginx
+- sets auto-renewal schedule
+
+===========================================================================
+24. FINAL BACKEND ENV AFTER HTTPS
+===========================================================================
+
+Once domain and SSL are live, backend env should use domain, not raw IP.
+
+Important final values:
+
+CLIENT_URL=https://acadexlearning.xyz
+CLIENT_URLS=https://www.acadexlearning.xyz
+COOKIE_SECURE=true
+COOKIE_SAME_SITE=lax
+
+Then reload PM2 env:
+
+cd ~/Acadex-lms-platform/Backend
+pm2 restart acadex-backend --update-env
+pm2 restart acadex-worker --update-env
+
+What it does:
+- reloads env values into the running backend and worker processes
+
+===========================================================================
+25. FINAL FRONTEND ENV AFTER HTTPS
+===========================================================================
+
+Frontend .env.production must also use domain, not raw IP:
+
+VITE_API_URL=https://acadexlearning.xyz/api/v1
+VITE_SOCKET_URL=https://acadexlearning.xyz
+
+After editing this file, rebuild frontend again:
+
+cd ~/Acadex-lms-platform/Frontend
+npm run build
+sudo rm -rf /var/www/acadex-frontend/*
+sudo cp -r dist/* /var/www/acadex-frontend/
+
+Why:
+- frontend build contains baked values
+- if env changes, old build still points to old API unless rebuilt
+
+===========================================================================
+26. S3 CORS UPDATE
+===========================================================================
+
+Because browser uploads directly to S3, bucket CORS must allow your frontend
+origins.
+
+Typical CORS example:
+
+[
+  {
+    "AllowedHeaders": ["*"],
+    "AllowedMethods": ["GET", "HEAD", "PUT"],
+    "AllowedOrigins": [
+      "http://localhost:5173",
+      "https://acadexlearning.xyz",
+      "https://www.acadexlearning.xyz"
+    ],
+    "ExposeHeaders": ["ETag"],
+    "MaxAgeSeconds": 3000
+  }
+]
+
+Why:
+- without this, browser blocks S3 upload from your production domain
+
+===========================================================================
+27. COMMON GOTCHAS WE HIT
+===========================================================================
+
+1. SSH stopped working
+   - reason: port 22 was restricted to old IP
+   - fix: temporarily open SSH to Anywhere IPv4, reconnect, then restrict again
+
+2. Backend port 5000 worked directly but site did not
+   - reason: Nginx proxy was not wired yet or backend was not running
+
+3. Mixed content error after HTTPS
+   - reason: frontend build still had old http://IP API URL
+   - fix: update Frontend/.env.production and rebuild
+
+4. Login worked but refresh/logout broke
+   - reason: raw HTTP deploy needed temporary cookie settings
+   - later fixed cleanly after HTTPS by using secure cookies and final envs
+
+5. Thumbnail upload failed with CORS
+   - reason: S3 bucket CORS still allowed localhost only
+   - fix: add production domain origins
+
+6. Lecture ready status did not update live
+   - reason: worker and backend were separate processes
+   - fix: Redis pub/sub based bridge between worker and socket server
+
+===========================================================================
+28. USEFUL PRODUCTION COMMANDS
+===========================================================================
+
+Check backend and worker:
+
+pm2 list
+
+View logs:
+
+pm2 logs acadex-backend
+pm2 logs acadex-worker
+
+Live monitor:
+
+pm2 monit
+
+Restart backend:
+
+pm2 restart acadex-backend --update-env
+
+Restart worker:
+
+pm2 restart acadex-worker --update-env
+
+Check Nginx config:
+
+sudo nginx -t
+
+Reload Nginx:
+
+sudo systemctl reload nginx
+
+Check Redis:
+
+redis-cli ping
+
+Check API locally from server:
+
+curl http://127.0.0.1:5000/api/v1/health
+
+===========================================================================
+29. FINAL SECURITY STATE WE WANT
+===========================================================================
+
+After deployment stabilizes:
+
+1. SSH 22
+   - lock back to My IP only
+
+2. HTTP 80
+   - public
+
+3. HTTPS 443
+   - public
+
+4. Port 5000
+   - not public
+
+Why:
+- users should access only Nginx
+- backend remains internal behind reverse proxy
+
+===========================================================================
+30. FINAL RESULT
+===========================================================================
+
+At the end of deployment, this is what we achieved:
+
+1. Frontend served by Nginx from same EC2
+2. Backend proxied through Nginx
+3. HTTPS enabled on acadexlearning.xyz
+4. PM2 keeps backend and worker alive
+5. Redis works locally
+6. Mongo Atlas stores production data
+7. S3 handles uploads
+8. CloudFront handles secure playback
+9. Domain works
+10. App survives reboot
+
+This is a clean, cost-effective, portfolio-friendly production deployment.
