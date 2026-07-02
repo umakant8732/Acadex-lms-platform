@@ -1,14 +1,10 @@
 import { env } from '../../../config/env.js'
 
-const defaultCookieSecure = env.NODE_ENV === 'production'
-
-// Lets us run HTTP on raw EC2 IP now and switch to HTTPS later from env only.
 const isCookieSecure = env.COOKIE_SECURE
   ? env.COOKIE_SECURE === 'true'
-  : defaultCookieSecure
+  : env.NODE_ENV === 'production'
 
-// Keep same-site simple for same-origin deploys unless we explicitly need cross-site cookies.
-const cookieSameSite = env.COOKIE_SAME_SITE || (isCookieSecure ? 'none' : 'lax')
+const cookieSameSite = env.COOKIE_SAME_SITE || 'lax'
 
 export const cookieOptions = {
   httpOnly: true,
