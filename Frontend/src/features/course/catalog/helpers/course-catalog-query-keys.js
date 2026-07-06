@@ -1,3 +1,1 @@
-export const courseCatalogQueryKeys = {
-  publishedCourses: ['published-courses']
-}
+export * from './course-catalog-query-keys.ts'

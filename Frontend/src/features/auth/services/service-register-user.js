@@ -1,5 +1,2 @@
-import { registerUserApi } from '../api/api-register-user.js'
+export * from './service-register-user.ts'
 
-export const registerUserService = async data => {
-  return await registerUserApi(data)
-}

@@ -1,5 +1,2 @@
-import { logoutUserApi } from '../api/api-logout-user.js'
+export * from './service-logout-user.ts'
 
-export const logoutUserService = async () => {
-  return await logoutUserApi()
-}

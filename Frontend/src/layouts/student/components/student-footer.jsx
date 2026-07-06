@@ -1,1 +1,1 @@
-﻿export { default } from '../../../shared/ui/app-shell/site-footer.jsx'
+export { default } from './student-footer.tsx'

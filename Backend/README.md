@@ -1,85 +1,152 @@
-1.
-npm i express mongoose dotenv cors helmet morgan
+# Acadex Backend
 
-2.
-npm i bcryptjs jsonwebtoken cookie-parser
+Acadex Backend powers the teacher, student, auth, payment, and media workflows for the Acadex LMS platform.
 
-3.
-npm i zod
+It provides secure REST APIs, background workers, direct S3 upload flows, CloudFront playback access, and enrollment-based course access control.
 
-4.
-npm i multer
+## Tech Stack
 
-5.
-npm i @aws-sdk/client-s3 @aws-sdk/s3-request-presigner
+- Node.js
+- Express.js
+- MongoDB + Mongoose
+- Redis
+- BullMQ
+- Socket.IO
+- Razorpay
+- AWS S3
+- AWS CloudFront
+- FFmpeg
+- Zod
 
-6.
-npm i redis bullmq
+## Core Modules
 
-7.
-npm i fluent-ffmpeg ffmpeg-static // future me iske replace karenge child process se
+### Auth
+- Register, login, logout, refresh token, current user
+- OTP email verification flow
+- Forgot password and reset password flow
+- JWT-based auth with role checks
 
-8.
-npm i razorpay
+### Course
+- Teacher course CRUD
+- Publish and unpublish flow
+- Manage course filters, pagination, and search
+- Public published course catalog
+- Student course library and overview
+- Direct S3 thumbnail upload with CloudFront delivery
 
-9.
-npm i socket.io
+### Lecture
+- Teacher lecture curriculum management
+- Presigned S3 video upload flow
+- Upload completion verification
+- HLS transcoding in background worker
+- Secure CloudFront playback access
+- Student watch page support with enrollment and preview checks
+- Socket-based lecture status updates
 
-10.
-npm i helmet express-rate-limit express-mongo-sanitize cors
+### Payment and Enrollment
+- Razorpay order creation
+- Payment verification
+- Payment failure reporting
+- Enrollment creation after successful payment
+- Duplicate purchase and duplicate enrollment protection
 
-11.
-npm i nodemailer
+## Project Structure
 
-12.
-npm i winston
+```text
+src/
+  app/          server and worker entry points
+  config/       env, Redis, AWS, CloudFront, socket, client origins
+  middlewares/  auth, role, validation, error handling
+  modules/      auth, course, lecture, payment, enrollment
+  routes/       route registration
+  templates/    email templates
+  utils/        logger, API helpers, shared utilities
+```
 
-13.
-npm i -D nodemon prettier eslint
+## Scripts
 
-14.
-npm i express-async-handler
+```bash
+npm run dev         # start API server with nodemon
+npm run dev:worker  # start background worker with nodemon
+npm run start       # start API server in production mode
+npm run start:worker
+```
 
-later services
+## Local Setup
 
-api-service
-video-service
-chat-service
-notification-service
+1. Go to the backend folder:
 
-PHASE 1 AUTH
-Done
+```bash
+cd Backend
+```
 
-PHASE 2 USER
-Get Profile
-Update Profile
-Upload Avatar
+2. Install dependencies:
 
-PHASE 3 COURSE
-Create Course
-Get Course
-Update Course
-Delete Course
+```bash
+npm install
+```
 
-PHASE 4 LECTURE
-Upload Video
-HLS Conversion
-Stream Video
+3. Create `.env` with your local values.
 
-PHASE 5 PAYMENT
-Razorpay/Stripe
-Purchase Course
+4. Make sure these services are available:
+- MongoDB
+- Redis
+- AWS S3 credentials
+- CloudFront keys for playback
+- Razorpay test keys
 
-PHASE 6 ENROLLMENT
-Enroll Student
-My Courses
+5. Start the API server:
 
-PHASE 7 CERTIFICATE
-Generate Certificate
+```bash
+npm run dev
+```
 
-PHASE 8 CHAT
-Socket.io Chat
+6. Start the worker in a separate terminal:
 
-PHASE 9 NOTIFICATION
-Email
-In-App Notification
+```bash
+npm run dev:worker
+```
+
+## Environment Overview
+
+Important backend env groups:
+
+- App: `PORT`, `NODE_ENV`
+- Database: `MONGO_URI`
+- Auth: `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, token expiry values
+- Client: `CLIENT_URL`, `CLIENT_URLS`
+- Cookies: `COOKIE_SECURE`, `COOKIE_SAME_SITE`
+- Redis: `REDIS_URL`
+- Email: `EMAIL_USER`, `EMAIL_PASS`
+- AWS: `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_S3_BUCKET_NAME`
+- Uploads: `AWS_S3_UPLOAD_URL_EXPIRES_IN`
+- Razorpay: `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`
+- CloudFront: `CLOUDFRONT_DOMAIN`, `CLOUDFRONT_KEY_PAIR_ID`, `CLOUDFRONT_PRIVATE_KEY_PATH`
+
+## Background Jobs
+
+The worker process handles long-running tasks outside the request cycle:
+
+- lecture video transcoding
+- HLS upload pipeline
+- expired upload cleanup
+- auth email queue processing
+
+## Production Notes
+
+Current production setup uses:
+
+- AWS EC2 for frontend and backend hosting
+- Nginx as reverse proxy
+- PM2 for backend and worker process management
+- MongoDB Atlas in production
+- Redis on the EC2 server
+- S3 for media storage
+- CloudFront for thumbnails and secure video playback
+- Let's Encrypt for HTTPS
+
+## Related Docs
+
+- [Platform Roadmap](../1.PROJECT_PHASE_ROADMAP.txt)
+- [EC2 Deployment Guide](../2.EC2_DEPLOYMENT_GUIDE.txt)
+- [Production Checklist](../3.PRODUCTION_CHECKLIST.txt)

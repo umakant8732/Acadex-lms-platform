@@ -1,5 +1,2 @@
-import { verifyEmailApi } from '../api/api-verify-email.js'
+export * from './service-verify-email.ts'
 
-export const verifyEmailService = async data => {
-  return await verifyEmailApi(data)
-}

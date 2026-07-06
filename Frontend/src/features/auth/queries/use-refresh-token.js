@@ -1,9 +1,2 @@
-import { useMutation } from '@tanstack/react-query'
+export * from './use-refresh-token.ts'
 
-import { refreshTokenService } from '../services/service-refresh-token.js'
-
-export const useRefreshToken = () => {
-  return useMutation({
-    mutationFn: refreshTokenService
-  })
-}

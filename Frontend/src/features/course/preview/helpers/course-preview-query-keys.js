@@ -1,3 +1,1 @@
-export const coursePreviewQueryKeys = {
-  courseDetails: courseId => ['course-preview-details', courseId]
-}
+export * from './course-preview-query-keys.ts'

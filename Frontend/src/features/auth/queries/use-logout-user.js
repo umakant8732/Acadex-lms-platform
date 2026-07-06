@@ -1,9 +1,2 @@
-import { useMutation } from '@tanstack/react-query'
+export * from './use-logout-user.ts'
 
-import { logoutUserService } from '../services/service-logout-user.js'
-
-export const useLogoutUser = () => {
-  return useMutation({
-    mutationFn: logoutUserService
-  })
-}

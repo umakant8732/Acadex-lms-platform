@@ -1,9 +1,2 @@
-import { useMutation } from '@tanstack/react-query'
+export * from './use-login-user.ts'
 
-import { loginUserService } from '../services/service-login-user.js'
-
-export const useLoginUser = () => {
-  return useMutation({
-    mutationFn: loginUserService
-  })
-}

@@ -64,6 +64,16 @@ const LecturePreviewPlayer = ({ playbackAccess, onClose, onPlaybackError }) => {
               password
             )
           }
+        },
+        fetchSetup: (context, initParams) => {
+          // Some browsers/loaders use fetch for HLS requests instead of XHR.
+          // This keeps segment access signed in both request paths.
+          const signedUrl = appendSignedQuery({
+            url: context.url,
+            signedQuery: playback.signedQuery
+          })
+
+          return new Request(signedUrl, initParams)
         }
       })
 
@@ -125,3 +135,4 @@ const LecturePreviewPlayer = ({ playbackAccess, onClose, onPlaybackError }) => {
 }
 
 export default LecturePreviewPlayer
+

@@ -1,7 +1,2 @@
-import { getStudentLecturePlaybackAccessApi } from '../api/api-get-student-lecture-playback-access.js'
+export * from './service-get-student-lecture-playback-access.ts'
 
-// Extracts clean playback access payload from backend response.
-export const getStudentLecturePlaybackAccessService = async lectureId => {
-  const response = await getStudentLecturePlaybackAccessApi(lectureId)
-  return response.data.data.playbackAccess
-}

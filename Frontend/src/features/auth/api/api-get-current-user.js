@@ -1,6 +1,2 @@
-import api from '../../../shared/services/axios.js'
+export * from './api-get-current-user.ts'
 
-export const getCurrentUserApi = async () => {
-  const response = await api.get('/auth/me')
-  return response.data
-}

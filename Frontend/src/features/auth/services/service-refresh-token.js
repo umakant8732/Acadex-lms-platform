@@ -1,5 +1,2 @@
-import { refreshTokenApi } from '../api/api-refresh-token.js'
+export * from './service-refresh-token.ts'
 
-export const refreshTokenService = async () => {
-  return await refreshTokenApi()
-}

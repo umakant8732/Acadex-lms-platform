@@ -1,0 +1,448 @@
+ACADEX FINAL FOLDER TREE
+========================
+
+Goal
+----
+This is the final scalable folder structure for Acadex before TypeScript migration.
+We will keep the code flow simple and consistent:
+
+Frontend flow:
+api -> service -> query -> hook -> page
+
+Backend flow:
+repository -> service -> controller -> route
+
+Core approach
+-------------
+1. Frontend will be feature-first.
+2. Backend will be domain-first modular monolith.
+3. Frontend can use actor split where useful: public / student / teacher.
+4. Backend will stay module/domain centric, not actor centric.
+5. Shared code will be kept only for truly reusable parts.
+6. This structure should be easy to migrate into microservices later.
+
+
+==================================================
+FRONTEND FINAL STRUCTURE
+==================================================
+
+Frontend/
+  public/
+
+  src/
+    app/
+      providers/
+        auth-provider.tsx
+        query-provider.tsx
+        store-provider.tsx
+      router/
+        app-router.tsx
+      store/
+        index.ts
+        root-reducer.ts
+      styles/
+        app.css
+        index.css
+
+    shared/
+      ui/
+        buttons/
+        inputs/
+        modals/
+        badges/
+        tables/
+        tabs/
+        loaders/
+      layout/
+        navbar/
+        footer/
+        sidebar/
+        page-shell/
+      lib/
+        axios/
+        socket/
+        utils/
+      hooks/
+        use-debounce.ts
+        use-toggle.ts
+      constants/
+      types/
+
+    features/
+      auth/
+        api/
+        services/
+        queries/
+        hooks/
+        components/
+        pages/
+        validations/
+        helpers/
+        constants/
+        types/
+
+      course/
+        shared/
+          components/
+          helpers/
+          constants/
+          types/
+          validations/
+
+        public/
+          api/
+          services/
+          queries/
+          hooks/
+          components/
+          pages/
+
+        student/
+          api/
+          services/
+          queries/
+          hooks/
+          components/
+          pages/
+
+        teacher/
+          api/
+          services/
+          queries/
+          hooks/
+          components/
+          pages/
+
+      lecture/
+        shared/
+          components/
+          helpers/
+          constants/
+          types/
+          validations/
+
+        student/
+          api/
+          services/
+          queries/
+          hooks/
+          components/
+          pages/
+
+        teacher/
+          api/
+          services/
+          queries/
+          hooks/
+          components/
+          pages/
+
+      payment/
+        student/
+          api/
+          services/
+          queries/
+          hooks/
+          components/
+          pages/
+          helpers/
+          constants/
+          types/
+
+      enrollment/
+        student/
+          api/
+          services/
+          queries/
+          hooks/
+          components/
+          pages/
+          helpers/
+          constants/
+          types/
+
+      user/
+        student/
+          api/
+          services/
+          queries/
+          hooks/
+          components/
+          pages/
+
+        teacher/
+          api/
+          services/
+          queries/
+          hooks/
+          components/
+          pages/
+
+      notification/
+        student/
+          api/
+          services/
+          queries/
+          hooks/
+          components/
+
+        teacher/
+          api/
+          services/
+          queries/
+          hooks/
+          components/
+
+    layouts/
+      public-layout.tsx
+      student-layout.tsx
+      teacher-layout.tsx
+
+    routes/
+      public-routes.tsx
+      student-routes.tsx
+      teacher-routes.tsx
+      auth-routes.tsx
+
+    main.tsx
+    app.tsx
+
+
+Frontend Notes
+--------------
+1. "shared" inside a feature means reusable only inside that feature.
+2. global "shared" means reusable across many features.
+3. teacher/student/public pages should not directly import each other.
+4. if both public and student use same course card, move it to:
+   features/course/shared/components/
+5. all API response types should live near their feature, not in one giant global types folder.
+
+
+==================================================
+BACKEND FINAL STRUCTURE
+==================================================
+
+Backend/
+  src/
+    app/
+      server.ts
+      worker.ts
+      socket/
+        socket-server.ts
+        socket-store.ts
+      bootstrap/
+        start-server.ts
+        start-worker.ts
+
+    config/
+      env/
+        env.ts
+      db/
+        mongo.ts
+      redis/
+        redis-client.ts
+        bullmq-connection.ts
+      aws/
+        s3-client.ts
+        cloudfront.ts
+      payment/
+        razorpay-client.ts
+      cors/
+        client-origins.ts
+
+    shared/
+      constants/
+      errors/
+      lib/
+      middlewares/
+      responses/
+      types/
+      utils/
+
+    modules/
+      auth/
+        models/
+        repositories/
+        services/
+        controllers/
+        routes/
+        validations/
+        helpers/
+        constants/
+        jobs/
+        workers/
+        types/
+
+      user/
+        models/
+        repositories/
+        services/
+        controllers/
+        routes/
+        validations/
+        helpers/
+        constants/
+        types/
+
+      course/
+        models/
+        repositories/
+        services/
+        controllers/
+        routes/
+        validations/
+        helpers/
+        constants/
+        types/
+
+      lecture/
+        models/
+        repositories/
+        services/
+        controllers/
+        routes/
+        validations/
+        helpers/
+        constants/
+        jobs/
+        workers/
+        types/
+
+      enrollment/
+        models/
+        repositories/
+        services/
+        controllers/
+        routes/
+        validations/
+        helpers/
+        constants/
+        types/
+
+      payment/
+        models/
+        repositories/
+        services/
+        controllers/
+        routes/
+        validations/
+        helpers/
+        constants/
+        webhooks/
+        types/
+
+      notification/
+        models/
+        repositories/
+        services/
+        controllers/
+        routes/
+        validations/
+        helpers/
+        constants/
+        jobs/
+        workers/
+        types/
+
+    routes/
+      index.ts
+
+    templates/
+      emails/
+
+    main.ts
+
+
+Backend Notes
+-------------
+1. Each module should own its model, repository, service, controller, and routes.
+2. One module should not directly access another module's repository.
+3. Cross-module communication should happen through service layer only.
+4. Shared infra like Redis, S3, CloudFront, logger, helpers should stay outside modules.
+5. Actor-specific behavior should be expressed in controller/service names, not by creating top-level teacher/student modules.
+
+
+==================================================
+NAMING RULES
+==================================================
+
+Frontend naming
+---------------
+1. Use kebab-case for folders and files.
+2. React component files can stay PascalCase only if needed by project preference.
+3. Hooks should start with use-.
+4. Query files should clearly show operation:
+   use-get-published-courses-query.ts
+5. Service files should clearly show purpose:
+   get-published-courses-service.ts
+
+Backend naming
+--------------
+1. Use kebab-case for folders and files.
+2. Keep singular domain names:
+   course, lecture, payment
+3. Controller names should describe action:
+   get-public-course-details-controller.ts
+   create-payment-order-controller.ts
+4. Service names should describe business action:
+   verify-payment-service.ts
+5. Repository names should describe data action:
+   find-course-by-id-repository.ts
+
+
+==================================================
+MICROSERVICE READINESS
+==================================================
+
+If Acadex grows later, these modules can be extracted more easily:
+
+1. auth
+2. course
+3. lecture
+4. payment
+5. enrollment
+6. notification
+
+Why this structure helps:
+-------------------------
+1. Domain code stays close together.
+2. Shared code is separated from business code.
+3. Module boundaries are visible early.
+4. Frontend also mirrors business domains, so large-scale split stays understandable.
+
+
+==================================================
+REFACTOR ORDER
+==================================================
+
+Recommended order before TypeScript migration:
+
+1. Lock this folder structure.
+2. Refactor current JS project into this structure without changing logic.
+3. Verify app still runs.
+4. Start TypeScript migration:
+   a. Frontend app setup
+   b. Frontend feature-by-feature conversion
+   c. Backend setup
+   d. Backend module-by-module conversion
+
+
+==================================================
+IMPORTANT RULE
+==================================================
+
+During migration:
+Do not mix feature refactor and logic refactor together.
+
+Allowed:
+- move files
+- rename files
+- fix imports
+- add types
+- add interfaces / type aliases / zod inferred types
+
+Avoid during migration:
+- rewriting business logic
+- changing API behavior
+- changing DB structure unless planned separately
+- changing UI flow unless bug fix is required

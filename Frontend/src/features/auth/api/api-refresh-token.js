@@ -1,6 +1,2 @@
-import api from '../../../shared/services/axios.js'
+export * from './api-refresh-token.ts'
 
-export const refreshTokenApi = async () => {
-  const response = await api.post('/auth/refresh-token')
-  return response.data
-}

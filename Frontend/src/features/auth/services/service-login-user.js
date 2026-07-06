@@ -1,5 +1,2 @@
-import { loginUserApi } from '../api/api-login-user.js'
+export * from './service-login-user.ts'
 
-export const loginUserService = async payload => {
-  return await loginUserApi(payload)
-}

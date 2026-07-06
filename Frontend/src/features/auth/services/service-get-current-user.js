@@ -1,5 +1,2 @@
-import { getCurrentUserApi } from '../api/api-get-current-user.js'
+export * from './service-get-current-user.ts'
 
-export const getCurrentUserService = async () => {
-  return await getCurrentUserApi()
-}

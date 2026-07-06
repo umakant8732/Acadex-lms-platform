@@ -1,0 +1,836 @@
+ACADEX TYPESCRIPT MIGRATION ROADMAP
+==================================
+
+Purpose
+-------
+This file defines the full TypeScript migration plan for Acadex.
+The migration will be done in very small chunks.
+We will not rewrite business logic during migration.
+We will only focus on:
+
+1. folder structure
+2. TypeScript setup
+3. type safety
+4. import cleanup
+5. production-safe code organization
+
+Current rule
+------------
+The JavaScript project is already working in local and production.
+So during migration:
+
+- existing functionality must stay same
+- no security compromise
+- no random refactor of business logic
+- every chunk must be locally tested before next chunk
+
+
+==================================================
+GLOBAL MIGRATION RULES
+==================================================
+
+Rule 1
+------
+Do not mix feature changes with TypeScript migration.
+
+Rule 2
+------
+If a file is being moved, do not also rewrite its logic in the same step.
+
+Rule 3
+------
+Every chunk must end with:
+- app still running
+- build passing
+- imports clean
+
+Rule 4
+------
+Frontend will be migrated first.
+Backend will be migrated after frontend is stable.
+
+Rule 5
+------
+Migration will happen on a separate branch only.
+
+
+==================================================
+PHASE 0 - SAFETY PREP
+==================================================
+
+Step 0.1 - Create migration branch
+----------------------------------
+Goal:
+Create a safe branch so production branch remains stable.
+
+Commands:
+git checkout -b typescript-migration
+
+Done when:
+- new branch is active
+
+
+Step 0.2 - Baseline local verification
+--------------------------------------
+Goal:
+Make sure current JS project is healthy before migration starts.
+
+Frontend checks:
+- npm run dev
+- npm run build
+
+Backend checks:
+- npm run dev
+- npm run dev:worker
+
+Manual flows:
+- auth
+- teacher course listing
+- create course
+- lecture upload
+- playback
+- payment flow
+
+Done when:
+- all critical flows work in JS version
+
+
+Step 0.3 - Freeze the target folder structure
+---------------------------------------------
+Goal:
+Use 4.ACADEX_FINAL_FOLDER_TREE.txt as the final structure source of truth.
+
+Done when:
+- folder tree is reviewed
+- we agree no major architecture change will happen during migration
+
+
+==================================================
+PHASE 1 - NON-TYPESCRIPT FOLDER REFACTOR
+==================================================
+
+Step 1.1 - Refactor frontend folder structure only
+--------------------------------------------------
+Goal:
+Move current frontend files into the final feature-first structure.
+
+Important:
+- JS stays JS
+- only move files and fix imports
+- no logic rewrite
+
+Done when:
+- current frontend code matches final tree closely
+- app still runs in JavaScript
+
+
+Step 1.2 - Refactor backend folder structure only
+-------------------------------------------------
+Goal:
+Move current backend files into final domain-first modular structure.
+
+Important:
+- JS stays JS
+- only move files and fix imports
+- no service logic rewrite
+
+Done when:
+- backend structure matches final tree closely
+- server and worker still run
+
+
+Step 1.3 - Post-refactor regression test
+----------------------------------------
+Goal:
+Confirm refactor did not break existing app behavior.
+
+Checks:
+- frontend build
+- backend server
+- backend worker
+- critical flows again
+
+Done when:
+- refactored JS project is still production-equivalent
+
+
+==================================================
+PHASE 2 - FRONTEND TYPESCRIPT FOUNDATION
+==================================================
+
+Step 2.1 - Install frontend TypeScript
+--------------------------------------
+Folder:
+Frontend/
+
+Goal:
+Add TypeScript support to the Vite frontend.
+
+Commands:
+cd Frontend
+npm install -D typescript
+
+Notes:
+- @types/react and @types/react-dom are already present
+- Vite and React plugin are already present
+
+Done when:
+- frontend has TypeScript package installed
+
+
+Step 2.2 - Add frontend TypeScript config
+-----------------------------------------
+Folder:
+Frontend/
+
+Goal:
+Create frontend tsconfig files and Vite type environment file.
+
+Files to create:
+- tsconfig.json
+- tsconfig.node.json
+- src/vite-env.d.ts
+
+Suggested focus:
+- strict mode enabled
+- noEmit for frontend type-checking
+- React JSX support
+- moduleResolution compatible with Vite
+
+Done when:
+- TypeScript compiler can understand the frontend project
+
+
+Step 2.3 - Add frontend type-check script
+-----------------------------------------
+Folder:
+Frontend/
+
+Goal:
+Type-check frontend without building logic changes.
+
+package.json scripts to add:
+- "type-check": "tsc --noEmit"
+
+Done when:
+- npm run type-check works
+
+
+Step 2.4 - Convert app entry files
+----------------------------------
+Folder:
+Frontend/src/
+
+Goal:
+Convert only the root app entry files first.
+
+Files:
+- main.jsx -> main.tsx
+- app.jsx -> app.tsx
+
+Important:
+- do not convert feature files yet
+
+Done when:
+- frontend dev server runs
+- frontend build works
+- npm run type-check runs
+
+
+==================================================
+PHASE 3 - FRONTEND LOW-RISK FILES
+==================================================
+
+Step 3.1 - Convert frontend shared constants
+--------------------------------------------
+Goal:
+Start with files that have almost no JSX and low runtime risk.
+
+Files:
+- shared/constants
+- feature constants
+
+Extensions:
+- .js -> .ts
+
+Done when:
+- constants compile with no type errors
+
+
+Step 3.2 - Convert frontend helpers and pure utils
+--------------------------------------------------
+Goal:
+Convert files with pure functions first.
+
+Files:
+- shared/lib/utils
+- feature helpers
+- formatters
+- query keys
+- class mappers
+
+Extensions:
+- .js -> .ts
+
+Done when:
+- helper files have typed input/output
+
+
+Step 3.3 - Convert validation files
+-----------------------------------
+Goal:
+Convert zod validation files and start using inferred types where useful.
+
+Files:
+- auth validations
+- course validations
+- lecture validations
+- payment validations
+
+Done when:
+- validation files are .ts
+- inferred types can be reused later
+
+
+==================================================
+PHASE 4 - FRONTEND DATA LAYER
+==================================================
+
+Step 4.1 - Convert API files
+----------------------------
+Goal:
+Convert raw HTTP files first.
+
+Files:
+- feature api files
+
+Focus:
+- request params types
+- response shapes
+- axios response generics where helpful
+
+Done when:
+- all API files are typed
+
+
+Step 4.2 - Convert service files
+--------------------------------
+Goal:
+Convert service files which map API responses.
+
+Focus:
+- input type
+- output type
+- response normalization type
+
+Done when:
+- service functions expose clean typed contracts
+
+
+Step 4.3 - Convert query files
+------------------------------
+Goal:
+Convert TanStack Query wrappers.
+
+Focus:
+- queryFn return type
+- mutation input/output type
+- query key typing
+
+Done when:
+- all queries and mutations are typed
+
+
+==================================================
+PHASE 5 - FRONTEND HOOKS
+==================================================
+
+Step 5.1 - Convert shared hooks
+-------------------------------
+Goal:
+Convert reusable hooks first.
+
+Examples:
+- debounce
+- toggles
+- socket helpers
+
+Done when:
+- hook params and return values are typed
+
+
+Step 5.2 - Convert feature hooks
+--------------------------------
+Goal:
+Convert auth, course, lecture, payment, enrollment hooks.
+
+Focus:
+- return object typing
+- local state typing
+- route param typing
+- event handler typing
+
+Done when:
+- hooks become the typed control layer for UI
+
+
+==================================================
+PHASE 6 - FRONTEND UI AND PAGES
+==================================================
+
+Step 6.1 - Convert shared UI components
+---------------------------------------
+Goal:
+Type reusable visual components first.
+
+Examples:
+- buttons
+- modal
+- tabs
+- table
+- badges
+
+Done when:
+- shared components accept typed props
+
+
+Step 6.2 - Convert feature components
+-------------------------------------
+Goal:
+Convert feature-level components after hooks are ready.
+
+Examples:
+- teacher course components
+- lecture curriculum components
+- student watch components
+- payment components
+
+Done when:
+- feature components use typed props only
+
+
+Step 6.3 - Convert pages
+------------------------
+Goal:
+Convert top-level pages last because they depend on everything below.
+
+Done when:
+- page files become .tsx
+- routes still work
+- no prop mismatch errors remain
+
+
+Step 6.4 - Frontend final verification
+--------------------------------------
+Checks:
+- npm run dev
+- npm run build
+- npm run type-check
+- all major flows manually verified
+
+Done when:
+- frontend migration is complete and stable
+
+
+==================================================
+PHASE 7 - BACKEND TYPESCRIPT FOUNDATION
+==================================================
+
+Step 7.1 - Install backend TypeScript core packages
+---------------------------------------------------
+Folder:
+Backend/
+
+Commands:
+cd Backend
+npm install -D typescript tsx @types/node @types/express
+
+Likely additional type packages later if needed:
+- @types/cors
+- @types/cookie-parser
+- @types/morgan
+- @types/jsonwebtoken
+- @types/multer
+- @types/mime-types
+- @types/compression
+- @types/fluent-ffmpeg
+
+Important:
+- install extra type packages only if compiler asks for them
+
+Done when:
+- core TS tooling is installed
+
+
+Step 7.2 - Add backend tsconfig
+-------------------------------
+Folder:
+Backend/
+
+Goal:
+Create production-safe TypeScript backend config.
+
+Files:
+- tsconfig.json
+
+Recommended setup:
+- outDir = dist
+- rootDir = src
+- strict mode enabled
+- ESM-compatible config for current project
+- source maps useful for debugging
+
+Done when:
+- TypeScript compiler understands backend source
+
+
+Step 7.3 - Add backend scripts
+------------------------------
+Folder:
+Backend/
+
+Goal:
+Enable TS dev and production builds.
+
+Suggested scripts:
+- dev: "tsx watch src/app/server.ts"
+- dev:worker: "tsx watch src/app/worker.ts"
+- build: "tsc"
+- start: "node dist/app/server.js"
+- start:worker: "node dist/app/worker.js"
+- type-check: "tsc --noEmit"
+
+Done when:
+- backend can run in TS dev mode
+- backend can build into dist
+
+
+Step 7.4 - Convert backend app entry files
+------------------------------------------
+Goal:
+Convert only backend entry files first.
+
+Files:
+- src/app/server.js -> server.ts
+- src/app/worker.js -> worker.ts
+
+Important:
+- do not convert entire modules yet
+
+Done when:
+- backend dev mode starts
+- worker dev mode starts
+
+
+==================================================
+PHASE 8 - BACKEND LOW-RISK SHARED LAYER
+==================================================
+
+Step 8.1 - Convert config files
+-------------------------------
+Goal:
+Type the environment, redis, aws, cloudfront, cors, db config layer.
+
+Files:
+- config/env
+- config/db
+- config/redis
+- config/aws
+- config/payment
+- config/cors
+
+Done when:
+- env and infra contracts are typed
+
+
+Step 8.2 - Convert shared utilities and middlewares
+---------------------------------------------------
+Goal:
+Convert generic helpers before module logic.
+
+Files:
+- shared/utils
+- shared/errors
+- shared/responses
+- shared/middlewares
+- shared/constants
+
+Done when:
+- cross-cutting layer is typed
+
+
+==================================================
+PHASE 9 - BACKEND SAFE MODULES FIRST
+==================================================
+
+Step 9.1 - Convert auth module
+------------------------------
+Order inside module:
+1. validations
+2. models
+3. repositories
+4. services
+5. controllers
+6. routes
+
+Reason:
+Auth touches the whole app, so we want it typed early and carefully.
+
+Done when:
+- auth endpoints still work
+
+
+Step 9.2 - Convert course module
+--------------------------------
+Order inside module:
+1. validations
+2. models
+3. repositories
+4. services
+5. controllers
+6. routes
+
+Done when:
+- course management and public course endpoints work
+
+
+Step 9.3 - Convert enrollment module
+------------------------------------
+Reason:
+Smaller domain and used by payment + student access.
+
+Done when:
+- access checks still work
+
+
+Step 9.4 - Convert payment module
+---------------------------------
+Reason:
+Payment is security-sensitive.
+Keep migration focused on typing only.
+
+Done when:
+- create order
+- verify payment
+- enrollment creation
+still work exactly the same
+
+
+==================================================
+PHASE 10 - BACKEND HEAVY MODULES LAST
+==================================================
+
+Step 10.1 - Convert lecture core module
+---------------------------------------
+Convert in order:
+1. validations
+2. models
+3. repositories
+4. services
+5. controllers
+6. routes
+
+Done when:
+- lecture CRUD-like flows still work
+
+
+Step 10.2 - Convert lecture jobs and workers
+--------------------------------------------
+Files:
+- jobs
+- workers
+- ffmpeg helpers
+- hls upload helpers
+- socket update emitters
+
+Reason:
+This is the most sensitive part of the app.
+It must be migrated after main backend contracts are typed.
+
+Done when:
+- upload
+- processing
+- ready status
+- playback
+still work
+
+
+==================================================
+PHASE 11 - BACKEND BUILD AND PROD SWITCH
+==================================================
+
+Step 11.1 - Backend final build verification
+--------------------------------------------
+Commands:
+npm run build
+npm run type-check
+
+Done when:
+- dist build succeeds
+
+
+Step 11.2 - Local production-style run
+--------------------------------------
+Commands:
+node dist/app/server.js
+node dist/app/worker.js
+
+Done when:
+- built version behaves same as dev version
+
+
+Step 11.3 - PM2 production command update
+-----------------------------------------
+Goal:
+After backend TS migration is fully done, PM2 in production should run built dist files.
+
+Future production command pattern:
+- pm2 start dist/app/server.js --name acadex-backend
+- pm2 start dist/app/worker.js --name acadex-worker
+
+Done when:
+- production no longer depends on source JS files
+
+
+==================================================
+PHASE 12 - TYPE CLEANUP AND STANDARDS
+==================================================
+
+Step 12.1 - Add module-local types
+----------------------------------
+Goal:
+Avoid giant global types folder.
+
+Examples:
+- course.types.ts
+- lecture.types.ts
+- payment.types.ts
+- auth.types.ts
+
+Done when:
+- feature-level types live near feature code
+
+
+Step 12.2 - Replace repeated inline object shapes
+-------------------------------------------------
+Goal:
+Where repeated shapes are used, replace them with:
+- type aliases
+- interfaces
+- zod inferred types
+
+Done when:
+- repeated object shapes are centralized per module
+
+
+Step 12.3 - Remove unsafe any usage
+-----------------------------------
+Goal:
+Keep migration production-safe.
+
+Rules:
+- avoid "any" unless absolutely necessary
+- prefer unknown + narrowing
+- prefer exact return types
+- type route params and request bodies
+
+Done when:
+- no careless any remains
+
+
+==================================================
+LOCAL TESTING CHECKLIST AFTER EVERY CHUNK
+==================================================
+
+Frontend after every chunk
+-------------------------
+1. npm run dev
+2. npm run build
+3. npm run type-check
+4. open app in browser
+5. test the affected flow only
+
+Backend after every chunk
+------------------------
+1. npm run dev
+2. npm run dev:worker if lecture/payment flow is affected
+3. npm run build
+4. npm run type-check
+5. test only the affected APIs and flows
+
+
+==================================================
+CRITICAL FLOWS TO RETEST BEFORE NEXT PHASE
+==================================================
+
+1. register
+2. login
+3. refresh token
+4. logout
+5. teacher create course
+6. teacher update course
+7. teacher publish/unpublish course
+8. teacher upload thumbnail
+9. teacher upload lecture video
+10. lecture processing to ready
+11. teacher preview playback
+12. public course listing
+13. public course details
+14. student payment
+15. enrollment-based student access
+16. student playback
+
+
+==================================================
+FINAL RECOMMENDED CHUNK ORDER
+==================================================
+
+Chunk 1  - migration branch + baseline checks
+Chunk 2  - frontend folder refactor only
+Chunk 3  - backend folder refactor only
+Chunk 4  - frontend TS setup
+Chunk 5  - frontend root entry conversion
+Chunk 6  - frontend constants/helpers/validations
+Chunk 7  - frontend api/services/queries
+Chunk 8  - frontend hooks
+Chunk 9  - frontend shared components
+Chunk 10 - frontend feature components/pages
+Chunk 11 - frontend final verification
+Chunk 12 - backend TS setup
+Chunk 13 - backend app entry conversion
+Chunk 14 - backend config/shared layer
+Chunk 15 - auth module
+Chunk 16 - course module
+Chunk 17 - enrollment module
+Chunk 18 - payment module
+Chunk 19 - lecture core module
+Chunk 20 - lecture worker/jobs/helpers
+Chunk 21 - backend build + dist verification
+Chunk 22 - PM2 production TS switch
+Chunk 23 - final cleanup and strict typing pass
+
+
+==================================================
+WHAT WE WILL NOT DO DURING MIGRATION
+==================================================
+
+1. no feature redesign
+2. no DB schema redesign unless separately planned
+3. no API response contract change unless needed for exact typing fix
+4. no UI rewrite
+5. no auth behavior change
+6. no payment logic rewrite
+
+
+==================================================
+SUCCESS CONDITION
+==================================================
+
+Migration is successful only when:
+
+1. folder structure matches the final architecture
+2. frontend is fully typed and stable
+3. backend is fully typed and stable
+4. local build passes
+5. critical flows still behave same
+6. production deployment path remains safe
