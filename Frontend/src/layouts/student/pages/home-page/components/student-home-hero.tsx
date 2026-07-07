@@ -5,7 +5,7 @@ const StudentHomeHero = ({
   categoryCount
 }: StudentHomeHeroProps) => {
   return (
-    <section className='border border-black/5 bg-white p-6 md:p-8'>
+    <section className='mt-5 border border-black/5 bg-white p-6 md:p-8'>
       <p className='text-xs uppercase tracking-[0.3em] text-black/35'>
         Student Library
       </p>

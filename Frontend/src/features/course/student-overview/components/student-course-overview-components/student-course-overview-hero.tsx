@@ -30,7 +30,7 @@ const StudentCourseOverviewHero = ({
   const hasPreviewLessons = contentStats.previewLessons > 0
 
   return (
-    <section className='border border-black/10 bg-white p-6 lg:p-8'>
+    <section className='mt-5 border border-black/10 bg-white p-6 lg:p-8'>
       <div className='grid gap-8 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-start'>
         <div className='overflow-hidden border border-black/10 bg-black/5'>
           {courseThumbnail ? (
