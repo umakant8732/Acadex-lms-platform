@@ -74,6 +74,7 @@ const StudentWatchPage = () => {
             playbackAccess={playbackAccess}
             isPlaybackLoading={isPlaybackLoading}
             isLessonAccessible={isActiveLessonAccessible}
+            isPurchased={isPurchased}
             previewActionPath={previewActionPath}
             checkoutActionPath={checkoutActionPath}
             onPlaybackError={handlePlaybackError}

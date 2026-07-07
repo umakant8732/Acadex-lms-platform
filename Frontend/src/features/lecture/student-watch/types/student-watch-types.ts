@@ -67,6 +67,7 @@ export interface StudentLecturePlayerProps {
   playbackAccess: StudentLecturePlaybackAccess | null
   isPlaybackLoading: boolean
   isLessonAccessible: boolean
+  isPurchased: boolean
   previewActionPath: string
   checkoutActionPath: string
   onPlaybackError?: (message?: string) => void

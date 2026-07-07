@@ -57,6 +57,7 @@ const StudentLecturePlayer = ({
   playbackAccess,
   isPlaybackLoading,
   isLessonAccessible,
+  isPurchased,
   previewActionPath,
   checkoutActionPath,
   onPlaybackError
@@ -156,6 +157,17 @@ const StudentLecturePlayer = ({
   }, [playbackAccess, onPlaybackError])
 
   if (!lesson) {
+    // Enrolled student — teacher hasn't uploaded any lessons yet.
+    if (isPurchased) {
+      return (
+        <PlayerState
+          title='Lessons are coming soon!'
+          subtitle='You have full access to this course. The instructor is preparing the lessons and they will appear here once uploaded.'
+        />
+      )
+    }
+
+    // Not enrolled — prompt to purchase.
     return (
       <PlayerState
         title='No lesson available yet'
