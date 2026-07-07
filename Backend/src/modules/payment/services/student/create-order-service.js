@@ -14,6 +14,7 @@ import { findActiveEnrollmentByUserAndCourse } from '../../../enrollment/reposit
 import { createPaymentAttempt } from '../../repositories/create-payment-attempt-repository.js'
 import { findActivePaymentAttemptByUserAndCourse } from '../../repositories/find-active-payment-attempt-repository.js'
 import { updatePaymentAttemptOrderId } from '../../repositories/update-payment-attempt-order-repository.js'
+import { updatePaymentAttemptAmount } from '../../repositories/update-payment-attempt-amount-repository.js'
 
 // Creates checkout order data for one student and one course.
 export const createOrderService = async ({ userId, courseId }) => {
@@ -57,11 +58,10 @@ export const createOrderService = async ({ userId, courseId }) => {
   )
 
   if (existingActiveAttempt?.providerOrderId) {
-    // If course price changed since attempt was created, skip reuse so
-    // student always pays the current price, not a stale cached amount.
     const priceChanged = existingActiveAttempt.amount !== amountInPaise
 
     if (!priceChanged) {
+      // Price same hai — reuse existing attempt and order directly.
       logger.info(
         `Reusing active payment attempt for userId=${userId} courseId=${courseId}`
       )
@@ -82,31 +82,77 @@ export const createOrderService = async ({ userId, courseId }) => {
       }
     }
 
+    // Price changed — update the existing attempt with new amount and fresh receipt
+    // instead of creating a new one (unique index on userId+courseId prevents duplicates).
     logger.info(
-      `Course price changed (old=${existingActiveAttempt.amount} new=${amountInPaise}), creating fresh order for userId=${userId} courseId=${courseId}`
+      `Course price changed (old=${existingActiveAttempt.amount} new=${amountInPaise}), updating existing attempt for userId=${userId} courseId=${courseId}`
     )
+
+    const updatedAttempt = await updatePaymentAttemptAmount(
+      existingActiveAttempt._id,
+      {
+        amount: amountInPaise,
+        receipt: `rcpt_${Date.now()}_${randomUUID().slice(0, 8)}`
+      }
+    )
+
+    if (!updatedAttempt) {
+      throw new ApiError(500, 'Failed to update payment attempt with new price')
+    }
+
+    // Create a fresh Razorpay order for the updated amount.
+    const razorpayOrder = await razorpayInstance.orders.create({
+      amount: updatedAttempt.amount,
+      currency: updatedAttempt.currency,
+      receipt: updatedAttempt.receipt,
+      notes: {
+        userId: String(userId),
+        courseId: String(courseId)
+      }
+    })
+
+    const savedAttempt = await updatePaymentAttemptOrderId(
+      updatedAttempt._id,
+      razorpayOrder.id
+    )
+
+    if (!savedAttempt) {
+      throw new ApiError(500, 'Failed to save updated payment order details')
+    }
+
+    logger.info(
+      `New Razorpay order created after price change for userId=${userId} courseId=${courseId} paymentAttemptId=${savedAttempt._id}`
+    )
+
+    return {
+      paymentAttemptId: savedAttempt._id,
+      orderId: savedAttempt.providerOrderId,
+      amount: savedAttempt.amount,
+      currency: savedAttempt.currency,
+      keyId: env.RAZORPAY_KEY_ID,
+      course: {
+        _id: course._id,
+        title: course.title,
+        price: course.price,
+        thumbnail: buildCourseThumbnailUrl(course.thumbnailKey)
+      },
+      isExistingAttempt: false
+    }
   }
 
-
-  // Create fresh attempt only when reusable active attempt is not available
-  // or when price has changed (existingActiveAttempt reuse is skipped above in that case).
-  const priceChangedOrNoAttempt =
-    !existingActiveAttempt ||
-    existingActiveAttempt.amount !== amountInPaise
-
+  // No active attempt exists — create a brand new one.
   const paymentAttempt =
-    !priceChangedOrNoAttempt
-      ? existingActiveAttempt
-      : await createPaymentAttempt({
-          userId,
-          courseId,
-          amount: amountInPaise,
-          currency: 'INR',
-          receipt: `rcpt_${Date.now()}_${randomUUID().slice(0, 8)}`,
-          metadata: {
-            courseTitle: course.title
-          }
-        })
+    existingActiveAttempt ||
+    (await createPaymentAttempt({
+      userId,
+      courseId,
+      amount: amountInPaise,
+      currency: 'INR',
+      receipt: `rcpt_${Date.now()}_${randomUUID().slice(0, 8)}`,
+      metadata: {
+        courseTitle: course.title
+      }
+    }))
 
   // Create real Razorpay order after local payment attempt is ready.
   const razorpayOrder = await razorpayInstance.orders.create({
