@@ -1,4 +1,4 @@
-﻿import mongoose from 'mongoose'
+import mongoose from 'mongoose'
 import { randomUUID } from 'node:crypto'
 
 import ApiError from '../../../../utils/api-error.js'
@@ -57,39 +57,56 @@ export const createOrderService = async ({ userId, courseId }) => {
   )
 
   if (existingActiveAttempt?.providerOrderId) {
-    logger.info(
-      `Reusing active payment attempt for userId=${userId} courseId=${courseId}`
-    )
+    // If course price changed since attempt was created, skip reuse so
+    // student always pays the current price, not a stale cached amount.
+    const priceChanged = existingActiveAttempt.amount !== amountInPaise
 
-    return {
-      paymentAttemptId: existingActiveAttempt._id,
-      orderId: existingActiveAttempt.providerOrderId,
-      amount: existingActiveAttempt.amount,
-      currency: existingActiveAttempt.currency,
-      keyId: env.RAZORPAY_KEY_ID,
-      course: {
-        _id: course._id,
-        title: course.title,
-        price: course.price,
-        thumbnail: buildCourseThumbnailUrl(course.thumbnailKey)
-      },
-      isExistingAttempt: true
+    if (!priceChanged) {
+      logger.info(
+        `Reusing active payment attempt for userId=${userId} courseId=${courseId}`
+      )
+
+      return {
+        paymentAttemptId: existingActiveAttempt._id,
+        orderId: existingActiveAttempt.providerOrderId,
+        amount: existingActiveAttempt.amount,
+        currency: existingActiveAttempt.currency,
+        keyId: env.RAZORPAY_KEY_ID,
+        course: {
+          _id: course._id,
+          title: course.title,
+          price: course.price,
+          thumbnail: buildCourseThumbnailUrl(course.thumbnailKey)
+        },
+        isExistingAttempt: true
+      }
     }
+
+    logger.info(
+      `Course price changed (old=${existingActiveAttempt.amount} new=${amountInPaise}), creating fresh order for userId=${userId} courseId=${courseId}`
+    )
   }
 
-  // Create fresh attempt only when reusable active attempt is not available.
+
+  // Create fresh attempt only when reusable active attempt is not available
+  // or when price has changed (existingActiveAttempt reuse is skipped above in that case).
+  const priceChangedOrNoAttempt =
+    !existingActiveAttempt ||
+    existingActiveAttempt.amount !== amountInPaise
+
   const paymentAttempt =
-    existingActiveAttempt ||
-    (await createPaymentAttempt({
-      userId,
-      courseId,
-      amount: amountInPaise,
-      currency: 'INR',
-      receipt: `rcpt_${Date.now()}_${randomUUID().slice(0, 8)}`,
-      metadata: {
-        courseTitle: course.title
-      }
-    }))
+    !priceChangedOrNoAttempt
+      ? existingActiveAttempt
+      : await createPaymentAttempt({
+          userId,
+          courseId,
+          amount: amountInPaise,
+          currency: 'INR',
+          receipt: `rcpt_${Date.now()}_${randomUUID().slice(0, 8)}`,
+          metadata: {
+            courseTitle: course.title
+          }
+        })
 
   // Create real Razorpay order after local payment attempt is ready.
   const razorpayOrder = await razorpayInstance.orders.create({

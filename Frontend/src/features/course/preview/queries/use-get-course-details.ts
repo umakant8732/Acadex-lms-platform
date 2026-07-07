@@ -20,8 +20,8 @@ export const useGetCourseDetails = (courseId: string | undefined) => {
       return getCourseDetailsService(courseId)
     },
     enabled: Boolean(courseId),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-    refetchOnWindowFocus: false
+    staleTime: 1 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: true
   })
 }

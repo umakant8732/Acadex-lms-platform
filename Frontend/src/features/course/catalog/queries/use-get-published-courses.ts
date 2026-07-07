@@ -13,8 +13,8 @@ export const useGetPublishedCourses = () => {
   return useQuery<PublishedCourseList, AxiosError<ApiErrorResponse>>({
     queryKey: courseCatalogQueryKeys.publishedCourses,
     queryFn: getPublishedCoursesService,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-    refetchOnWindowFocus: false
+    staleTime: 1 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: true
   })
 }
