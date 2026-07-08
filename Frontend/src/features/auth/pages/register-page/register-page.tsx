@@ -42,6 +42,7 @@ const RegisterPage = () => {
             value={formData.email}
             onChange={handleChange}
             placeholder='Enter email'
+            autoComplete='username'
             className='input input-bordered h-14 w-full rounded-none bg-white'
           />
 

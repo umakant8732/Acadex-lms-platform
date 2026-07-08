@@ -6,6 +6,7 @@ const ForgotPasswordPage = () => {
   const {
     email,
     errors,
+    isSubmitting,
     handleEmailChange,
     handleSubmit
   } = useForgotPasswordPage()
@@ -25,6 +26,7 @@ const ForgotPasswordPage = () => {
             value={email}
             onChange={handleEmailChange}
             placeholder='Enter registered email'
+            autoComplete='username'
             className='input input-bordered h-14 w-full rounded-none bg-white'
           />
 
@@ -35,9 +37,10 @@ const ForgotPasswordPage = () => {
 
         <button
           type='submit'
+          disabled={isSubmitting}
           className='btn btn-neutral mt-2 h-14 w-full rounded-none'
         >
-          Send OTP
+          {isSubmitting ? 'Sending...' : 'Send OTP'}
         </button>
       </form>
     </AuthWrapper>
