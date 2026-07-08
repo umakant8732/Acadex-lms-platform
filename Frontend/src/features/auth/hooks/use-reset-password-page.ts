@@ -1,5 +1,5 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 import { useResetPassword } from '../queries/use-forgot-reset-password'
 import { clearVerificationEmail, getVerificationEmail } from '../services/auth-storage'
@@ -20,7 +20,6 @@ const initialFormValues = {
 
 // Handles Reset Password form state, validation, and submission
 export const useResetPasswordPage = (): ResetPasswordPageHookResult => {
-  const location = useLocation()
   const navigate = useNavigate()
   const resetPasswordMutation = useResetPassword()
 
@@ -30,10 +29,10 @@ export const useResetPasswordPage = (): ResetPasswordPageHookResult => {
   const email = getVerificationEmail()
 
   useEffect(() => {
-    if (!email) {
-      navigate(`/auth/forgot-password${location.search}`)
+    if (!email && !resetPasswordMutation.isSuccess) {
+      navigate('/auth/forgot-password')
     }
-  }, [email, location.search, navigate])
+  }, [email, navigate, resetPasswordMutation.isSuccess])
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target
@@ -74,7 +73,7 @@ export const useResetPasswordPage = (): ResetPasswordPageHookResult => {
 
       clearVerificationEmail()
       showSuccess(response.message || 'Password reset successfully')
-      navigate(`/auth${location.search}`)
+      navigate('/auth')
     } catch (error) {
       const apiError = error as AuthApiError
       showError(apiError.response?.data?.message || 'Failed to reset password')

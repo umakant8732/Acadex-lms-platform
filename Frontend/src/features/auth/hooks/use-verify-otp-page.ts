@@ -1,5 +1,5 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 import { useVerifyEmail } from '../queries/use-verify-email'
 import {
@@ -21,7 +21,6 @@ import { useResendOtp } from '../queries/use-resend-otp'
 
 // Handles OTP input state and email-verification submit flow.
 export const useVerifyOtpPage = (): VerifyOtpPageHookResult => {
-  const location = useLocation()
   const navigate = useNavigate()
   const verifyMutation = useVerifyEmail()
   const resendMutation = useResendOtp()
@@ -34,9 +33,9 @@ export const useVerifyOtpPage = (): VerifyOtpPageHookResult => {
 
   useEffect(() => {
     if (!email) {
-      navigate(`/auth${location.search}`)
+      navigate('/auth')
     }
-  }, [email, location.search, navigate])
+  }, [email, navigate])
 
   //count down timer logic
   useEffect(() => {
@@ -95,7 +94,7 @@ export const useVerifyOtpPage = (): VerifyOtpPageHookResult => {
       clearVerificationEmail()
       clearVerificationOtpExpiry()
       showSuccess(response.message)
-      navigate(`/auth${location.search}`)
+      navigate('/auth')
     } catch (error) {
       const apiError = error as AuthApiError
       showError(apiError.response?.data?.message || 'OTP verification failed')
