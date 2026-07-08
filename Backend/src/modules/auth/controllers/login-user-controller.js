@@ -1,19 +1,15 @@
 import asyncHandler from '../../../utils/async-handler.js'
 import ApiResponse from '../../../utils/api-response.js'
-import { cookieOptions } from '../constants/auth-constants.js'
 import { loginService } from '../services/login-user-service.js'
+import { authenticateUserAndSetCookies } from '../helpers/auth-token-helper.js'
 
 export const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body
 
-  const { user, accessToken, refreshToken } = await loginService(
-    email,
-    password
-  )
+  const { user } = await loginService(email, password)
 
-  res.cookie('accessToken', accessToken, cookieOptions)
-
-  res.cookie('refreshToken', refreshToken, cookieOptions)
+  // Generate tokens, save refresh token to DB, update lastLogin, and set secure cookies
+  await authenticateUserAndSetCookies(user, res)
 
   return res.status(200).json(
     new ApiResponse(200, 'Login successful', {

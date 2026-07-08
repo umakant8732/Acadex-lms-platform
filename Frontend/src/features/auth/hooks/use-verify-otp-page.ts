@@ -1,5 +1,5 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import { useVerifyEmail } from '../queries/use-verify-email'
 import {
@@ -10,6 +10,8 @@ import {
   saveVerificationOtpExpiry
 } from '../services/auth-storage'
 import { verifyEmailSchema } from '../validations/verify-email-schema'
+import { setUser, useAppDispatch } from '../../../app/store'
+import { getPostLoginRedirectPath } from '../../../shared/utils/auth-redirect.js'
 import { showError, showSuccess } from '../../../shared/utils/toast'
 import { getZodErrors } from '../../../shared/utils/zod.js'
 import type {
@@ -21,7 +23,9 @@ import { useResendOtp } from '../queries/use-resend-otp'
 
 // Handles OTP input state and email-verification submit flow.
 export const useVerifyOtpPage = (): VerifyOtpPageHookResult => {
+  const location = useLocation()
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const verifyMutation = useVerifyEmail()
   const resendMutation = useResendOtp()
 
@@ -31,11 +35,13 @@ export const useVerifyOtpPage = (): VerifyOtpPageHookResult => {
   const [timeLeft, setTimeLeft] = useState<number>(0)
   const email = getVerificationEmail() as string | null
 
+  const redirectPath = new URLSearchParams(location.search).get('redirect')
+
   useEffect(() => {
     if (!email) {
-      navigate('/auth')
+      navigate(`/auth${location.search}`)
     }
-  }, [email, navigate])
+  }, [email, location.search, navigate])
 
   //count down timer logic
   useEffect(() => {
@@ -91,10 +97,18 @@ export const useVerifyOtpPage = (): VerifyOtpPageHookResult => {
 
       const response = await verifyMutation.mutateAsync(result.data)
 
+      dispatch(setUser(response.data))
+
       clearVerificationEmail()
       clearVerificationOtpExpiry()
       showSuccess(response.message)
-      navigate('/auth')
+
+      navigate(
+        getPostLoginRedirectPath({
+          role: response.data.role,
+          redirectPath
+        })
+      )
     } catch (error) {
       const apiError = error as AuthApiError
       showError(apiError.response?.data?.message || 'OTP verification failed')

@@ -1,6 +1,7 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
 import { HiOutlineXMark } from 'react-icons/hi2'
+import { showInfo } from '../../../shared/utils/toast.js'
 
 import {
   HiOutlineBookOpen,
@@ -17,6 +18,7 @@ export interface MenuItem {
   name: string
   icon: React.ReactNode
   path: string
+  disabled?: boolean
 }
 
 const menus: MenuItem[] = [
@@ -38,17 +40,20 @@ const menus: MenuItem[] = [
   {
     name: 'Students',
     icon: <HiOutlineUsers />,
-    path: '/teacher/students'
+    path: '/teacher/students',
+    disabled: true
   },
   {
     name: 'Messages',
     icon: <HiOutlineChatBubbleLeftRight />,
-    path: '/teacher/messages'
+    path: '/teacher/messages',
+    disabled: true
   },
   {
     name: 'Settings',
     icon: <HiOutlineCog6Tooth />,
-    path: '/teacher/settings'
+    path: '/teacher/settings',
+    disabled: true
   }
 ]
 
@@ -81,34 +86,67 @@ const TeacherSidebar: React.FC<TeacherSidebarProps> = ({
       </div>
 
       <div className='mt-10 flex flex-1 flex-col gap-2 overflow-y-auto pr-1'>
-        {menus.map(menu => (
-          <NavLink
-            key={menu.name}
-            to={menu.path}
-            onClick={onClose}
-            className={({ isActive }) =>
-              `
-                h-12
-                px-4
-                flex
-                items-center
-                gap-3
-                text-sm
-                font-medium
-                transition
-                border
-                ${
-                  isActive
-                    ? 'border-black bg-black text-white'
-                    : 'border-transparent bg-white hover:border-black/10'
-                }
-              `
-            }
-          >
-            <span className='text-lg'>{menu.icon}</span>
-            {menu.name}
-          </NavLink>
-        ))}
+        {menus.map(menu => {
+          if (menu.disabled) {
+            return (
+              <button
+                key={menu.name}
+                onClick={() => {
+                  showInfo(`Coming Soon: ${menu.name} module is under development!`)
+                  if (onClose) onClose()
+                }}
+                className='
+                  h-12
+                  px-4
+                  flex
+                  w-full
+                  items-center
+                  gap-3
+                  text-sm
+                  font-medium
+                  transition
+                  border
+                  border-transparent
+                  bg-white
+                  hover:border-black/10
+                  text-black/50
+                '
+              >
+                <span className='text-lg'>{menu.icon}</span>
+                {menu.name}
+              </button>
+            )
+          }
+
+          return (
+            <NavLink
+              key={menu.name}
+              to={menu.path}
+              onClick={onClose}
+              className={({ isActive }) =>
+                `
+                  h-12
+                  px-4
+                  flex
+                  items-center
+                  gap-3
+                  text-sm
+                  font-medium
+                  transition
+                  border
+                  ${
+                    isActive
+                      ? 'border-black bg-black text-white'
+                      : 'border-transparent bg-white hover:border-black/10'
+                  }
+                `
+              }
+            >
+              <span className='text-lg'>{menu.icon}</span>
+              {menu.name}
+            </NavLink>
+          )
+        })}
       </div>
     </aside>
   )

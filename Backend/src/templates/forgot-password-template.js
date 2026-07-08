@@ -25,7 +25,7 @@ export const forgotPasswordTemplate = otp => {
             margin:0;
             font-size:28px;
           ">
-            LMS Platform
+            Acadex LMS Plaform
           </h1>
         </div>
 
@@ -93,7 +93,7 @@ export const forgotPasswordTemplate = otp => {
             text-align:center;
             margin:0;
           ">
-            This is an automated email from LMS Platform.
+            This is an automated email from Acadex LMS Platform.
             Please do not reply to this message.
           </p>
         </div>

@@ -12,7 +12,7 @@ export const verifyEmailTemplate = otp => {
 
       <div style="background:#2563eb;padding:24px;text-align:center;">
         <h1 style="margin:0;color:#ffffff;">
-          LMS Platform
+         Acadex LMS Platform
         </h1>
       </div>
 
@@ -23,7 +23,7 @@ export const verifyEmailTemplate = otp => {
         </h2>
 
         <p style="color:#4b5563;font-size:16px;line-height:1.6;">
-          Welcome to LMS Platform.
+          Welcome to Acadex LMS Platform.
           Please use the verification code below to verify your email address.
         </p>
 
@@ -55,7 +55,7 @@ export const verifyEmailTemplate = otp => {
         color:#9ca3af;
         font-size:12px;
       ">
-        © ${new Date().getFullYear()} LMS Platform
+        © ${new Date().getFullYear()} Acadex LMS Platform
       </div>
 
     </div>

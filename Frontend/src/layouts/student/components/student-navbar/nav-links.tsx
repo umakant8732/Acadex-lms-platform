@@ -1,5 +1,6 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
+import { showInfo } from '../../../../shared/utils/toast'
 
 interface NavItem {
   label: string
@@ -43,12 +44,13 @@ const NavLinks: React.FC<NavLinksProps> = ({
       {navItems.map(item => {
         if (item.disabled) {
           return (
-            <span
+            <button
               key={item.label}
-              className={mobile ? 'text-sm font-medium text-black/35' : 'text-sm font-medium text-black/35'}
+              onClick={() => showInfo(`Coming Soon: ${item.label} module is under development!`)}
+              className={mobile ? 'text-left text-sm font-medium text-black/35 hover:text-black transition' : 'text-sm font-medium text-black/35 hover:text-black transition'}
             >
               {item.label}
-            </span>
+            </button>
           )
         }
 

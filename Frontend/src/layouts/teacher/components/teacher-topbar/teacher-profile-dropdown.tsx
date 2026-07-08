@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 
 import { useAuthLogout } from '../../../../features/auth/hooks/use-auth-logout'
 import DropdownPanel from '../../../../shared/ui/app-shell/dropdown-panel.js'
+import { showInfo } from '../../../../shared/utils/toast.js'
 
 const menuItemClasses = `
   block
@@ -35,13 +36,25 @@ const TeacherProfileDropdown: React.FC = () => {
 
       {open && (
         <DropdownPanel>
-          <Link to='/teacher/profile' className={menuItemClasses}>
+          <button
+            onClick={() => {
+              showInfo('Coming Soon: Profile module is under development!')
+              setOpen(false)
+            }}
+            className={menuItemClasses}
+          >
             Profile
-          </Link>
+          </button>
 
-          <Link to='/teacher/settings' className={menuItemClasses}>
+          <button
+            onClick={() => {
+              showInfo('Coming Soon: Settings module is under development!')
+              setOpen(false)
+            }}
+            className={menuItemClasses}
+          >
             Settings
-          </Link>
+          </button>
 
           <button
             onClick={handleLogout}

@@ -1,9 +1,11 @@
 import React from 'react'
 import { FiBell } from 'react-icons/fi'
+import { showInfo } from '../../../../shared/utils/toast'
 
 const NotificationButton: React.FC = () => {
   return (
     <button
+      onClick={() => showInfo('Coming Soon: Notifications module is under development!')}
       className='
         relative
         text-2xl

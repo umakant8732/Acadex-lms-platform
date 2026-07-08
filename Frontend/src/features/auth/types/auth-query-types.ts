@@ -45,7 +45,7 @@ export interface LogoutUserResponse extends AuthMessageResponse {
 }
 
 export interface VerifyEmailResponse extends AuthMessageResponse {
-  data?: null
+  data: AuthUser
 }
 
 export interface ForgotPasswordPayload {
