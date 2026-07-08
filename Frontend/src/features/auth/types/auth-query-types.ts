@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import type { AuthUser } from '../../../app/store'
 import type {
   LoginFormValues,
@@ -18,9 +19,20 @@ export interface AuthUserResponse extends AuthMessageResponse {
   data: AuthUser
 }
 
+export interface ResendOtpPayload {
+  email: string
+}
+
+export interface ResendOtpResponse extends AuthMessageResponse {
+  data?: { expiresIn?: number } | null
+}
+
+
+
 export interface RegisterUserResponse extends AuthMessageResponse {
   data: {
-    email: string
+    email: string,
+    expiresIn?: number //
   }
 }
 
@@ -34,4 +46,14 @@ export interface LogoutUserResponse extends AuthMessageResponse {
 
 export interface VerifyEmailResponse extends AuthMessageResponse {
   data?: null
+}
+
+export interface ForgotPasswordPayload {
+  email : string
+}
+
+export interface ResetPasswordPayload {
+  email : string,
+  otp : string,
+  newPassword: z.infer<typeof import('../validations/reset-password-schema').resetPasswordSchema>['newPassword']
 }

@@ -15,5 +15,8 @@ export const resentOTPService = async email => {
 
   await sendOTPToUser(email)
 
-  return { message: 'OTP send successfully' }
+  return { 
+    message: 'OTP send successfully',
+    expiresIn : 300 //
+   }
 }

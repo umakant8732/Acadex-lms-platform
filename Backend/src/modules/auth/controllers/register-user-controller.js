@@ -8,7 +8,8 @@ export const registerUser = asyncHandler(async (req, res) => {
   if (!result.isNewUser) {
     return res.status(200).json(
       new ApiResponse(200, 'Verification OTP sent again', {
-        email: result.email
+        email: result.email,
+        expiresIn : result.expiresIn
       })
     )
   }
@@ -21,7 +22,8 @@ export const registerUser = asyncHandler(async (req, res) => {
       fullName: user.fullName,
       email: user.email,
       isEmailVerified: user.isEmailVerified,
-      avatar: user.avatar
+      avatar: user.avatar,
+      expiresIn : result.expiresIn
     })
   )
 })

@@ -2,13 +2,24 @@ import AuthHeader from '../../components/auth-header'
 import AuthWrapper from '../../components/auth-wrapper'
 import { useVerifyOtpPage } from '../../hooks/use-verify-otp-page'
 
+
+const formatTime = (seconds: number) => {
+  const mins = Math.floor(seconds / 60)
+  const secs = seconds % 60
+
+  return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+}
+
 const VerifyOtpPage = () => {
   const {
     otp,
     errors,
     isSubmitting,
+    timeLeft,
+    isResending,
     handleOtpChange,
-    handleSubmit
+    handleSubmit,
+    handleResendOtp
   } = useVerifyOtpPage()
 
   return (
@@ -33,6 +44,20 @@ const VerifyOtpPage = () => {
           {errors.otp && <p className='text-sm text-red-500'>{errors.otp}</p>}
         </div>
 
+         {timeLeft > 0 ? (
+            <p className='text-sm text-black/55 mt-2'>
+              OTP expires in:{' '}
+              <span className='font-mono font-medium text-black'>
+                {formatTime(timeLeft)}
+              </span>
+            </p>
+          ) : (
+            <p className='text-sm text-red-500 mt-2 font-medium'>
+              OTP has expired. Please request a new one.
+            </p>
+          )}
+        
+
         <button
           type='submit'
           disabled={isSubmitting}
@@ -40,6 +65,17 @@ const VerifyOtpPage = () => {
         >
           {isSubmitting ? 'Verifying...' : 'Verify OTP'}
         </button>
+
+        <div className='text-center mt-4'>
+          <button
+            type='button'
+            onClick={handleResendOtp}
+            disabled={timeLeft > 0 || isResending}
+            className='text-sm font-semibold text-neutral hover:underline disabled:opacity-40 disabled:no-underline'
+          >
+            {isResending ? 'Resending OTP...' : 'Resend OTP'}
+          </button>
+        </div>
       </form>
     </AuthWrapper>
   )

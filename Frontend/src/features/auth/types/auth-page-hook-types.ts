@@ -41,17 +41,34 @@ export interface RegisterPageHookResult {
 export interface ForgotPasswordPageHookResult {
   email: string
   errors: AuthFieldErrors<'email'>
+  isSubmitting: boolean
   handleEmailChange: (event: ChangeEvent<HTMLInputElement>) => void
-  handleSubmit: (event: FormEvent<HTMLFormElement>) => void
+  handleSubmit: (event: FormEvent<HTMLFormElement>) => void | Promise<void>
 }
 
 export interface VerifyOtpPageHookResult {
   otp: string
   errors: AuthFieldErrors<'otp'>
   isSubmitting: boolean
+  timeLeft : number
+  isResending: boolean
   handleOtpChange: (event: ChangeEvent<HTMLInputElement>) => void
   handleSubmit: (event: FormEvent<HTMLFormElement>) => void | Promise<void>
+  handleResendOtp: () => Promise<void>
 }
+
+export interface ResetPasswordPageHookResult {
+  formData: {
+    otp: string
+    newPassword: string
+    confirmPassword: string
+  }
+  errors: AuthFieldErrors<'otp' | 'newPassword' | 'confirmPassword'>
+  isSubmitting: boolean
+  handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+  handleSubmit: (event: React.FormEvent<HTMLFormElement>) => void | Promise<void>
+}
+
 
 export interface AuthLogoutHookResult {
   handleLogout: () => Promise<void>

@@ -17,7 +17,8 @@ export const registerService = async payload => {
 
     return {
       isNewUser: false,
-      email: existingUser.email
+      email: existingUser.email,
+      expiresIn : 300 //5 min
     }
   }
 
@@ -31,6 +32,7 @@ export const registerService = async payload => {
 
   return {
     isNewUser: true,
-    user
+    user,
+    expiresIn : 300 //5min
   }
 }

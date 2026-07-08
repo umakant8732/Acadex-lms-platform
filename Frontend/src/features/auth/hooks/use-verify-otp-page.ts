@@ -4,7 +4,10 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useVerifyEmail } from '../queries/use-verify-email'
 import {
   clearVerificationEmail,
-  getVerificationEmail
+  clearVerificationOtpExpiry,
+  getVerificationEmail,
+  getVerificationOtpExpiry,
+  saveVerificationOtpExpiry
 } from '../services/auth-storage'
 import { verifyEmailSchema } from '../validations/verify-email-schema'
 import { showError, showSuccess } from '../../../shared/utils/toast'
@@ -14,16 +17,19 @@ import type {
   AuthFieldErrors,
   VerifyOtpPageHookResult
 } from '../types/auth-page-hook-types'
+import { useResendOtp } from '../queries/use-resend-otp'
 
 // Handles OTP input state and email-verification submit flow.
 export const useVerifyOtpPage = (): VerifyOtpPageHookResult => {
   const location = useLocation()
   const navigate = useNavigate()
   const verifyMutation = useVerifyEmail()
+  const resendMutation = useResendOtp()
 
   const [otp, setOtp] = useState('')
   const [errors, setErrors] = useState<AuthFieldErrors<'otp'>>({})
 
+  const [timeLeft, setTimeLeft] = useState<number>(0)
   const email = getVerificationEmail() as string | null
 
   useEffect(() => {
@@ -31,6 +37,32 @@ export const useVerifyOtpPage = (): VerifyOtpPageHookResult => {
       navigate(`/auth${location.search}`)
     }
   }, [email, location.search, navigate])
+
+  //count down timer logic
+  useEffect(() => {
+    const expiryTime = getVerificationOtpExpiry()
+    if (!expiryTime) return
+
+    const calculateTimeLeft = () => {
+      const difference = expiryTime - Date.now()
+      return Math.max(0, Math.floor(difference / 1000))
+    }
+
+    setTimeLeft(calculateTimeLeft())
+
+    const timer = setInterval(() => {
+      const remaining = calculateTimeLeft()
+
+      setTimeLeft(remaining)
+
+      if (remaining <= 0) {
+        clearInterval(timer)
+      }
+    }, 1000)
+
+
+    return () => clearInterval(timer)
+  },[timeLeft === 0])
 
   const handleOtpChange = (event: ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value
@@ -61,6 +93,7 @@ export const useVerifyOtpPage = (): VerifyOtpPageHookResult => {
       const response = await verifyMutation.mutateAsync(result.data)
 
       clearVerificationEmail()
+      clearVerificationOtpExpiry()
       showSuccess(response.message)
       navigate(`/auth${location.search}`)
     } catch (error) {
@@ -69,12 +102,37 @@ export const useVerifyOtpPage = (): VerifyOtpPageHookResult => {
     }
   }
 
+
+  //handle resend otp
+
+  const handleResendOtp = async () => {
+    if(!email) return 
+    
+    try {
+      const response = await resendMutation.mutateAsync({email})
+      const expiresIn = response.data?.expiresIn || 300
+      saveVerificationOtpExpiry(expiresIn)
+
+      //update local state timer immediately
+      setTimeLeft(expiresIn)
+      showSuccess(response.message || 'New to send to your email')
+    } catch (error) {
+      const apiError = error as AuthApiError
+      showError(apiError.response?.data?.message || 'Failed to resend OTP')
+    }
+  }
+
+
   return {
     otp,
     errors,
     isSubmitting: verifyMutation.isPending,
+    timeLeft,
+    isResending: resendMutation.isPending,
+
     handleOtpChange,
-    handleSubmit
+    handleSubmit,
+    handleResendOtp
   }
 }
 
