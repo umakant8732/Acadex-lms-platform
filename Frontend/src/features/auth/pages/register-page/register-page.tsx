@@ -57,6 +57,7 @@ const RegisterPage = () => {
             value={formData.password}
             onChange={handleChange}
             placeholder='Create password'
+            autoComplete='new-password'
             className='input input-bordered h-14 w-full rounded-none bg-white'
           />
 

@@ -43,6 +43,7 @@ const LoginPage = () => {
             value={formData.password}
             onChange={handleChange}
             placeholder='Enter password'
+            autoComplete='current-password'
             className='input input-bordered h-14 w-full rounded-none bg-white'
           />
 

@@ -40,6 +40,7 @@ const ResetPasswordPage = () => {
             value={formData.newPassword}
             onChange={handleChange}
             placeholder='New Password'
+            autoComplete='new-password'
             className='input input-bordered h-14 w-full rounded-none bg-white'
           />
           {errors.newPassword && (
@@ -54,6 +55,7 @@ const ResetPasswordPage = () => {
             value={formData.confirmPassword}
             onChange={handleChange}
             placeholder='Confirm New Password'
+            autoComplete='new-password'
             className='input input-bordered h-14 w-full rounded-none bg-white'
           />
           {errors.confirmPassword && (
