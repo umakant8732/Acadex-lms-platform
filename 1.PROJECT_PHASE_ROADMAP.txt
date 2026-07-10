@@ -66,11 +66,12 @@ Course Module - Public / Student Surfaces
 Auth / Public Module Cleanup
 [x] Hooks added where needed
 [x] Auth/public module readability cleanup
-[ ] Forgot password API frontend integration
+[x] Forgot password API frontend integration
 [ ] Refresh token API/frontend flow
-[ ] Resend OTP API/frontend flow
+[x] Resend OTP API/frontend flow
 [ ] Profile update API/frontend flow
 [ ] Final auth edge-case testing
+
 
 
 ============================================================

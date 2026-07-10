@@ -4,6 +4,7 @@ import { logger } from '../../../../utils/logger.js'
 import { deleteCourseById } from '../../repositories/delete-course-repository.js'
 import { clearPublishedCoursesCache } from '../../redis/published-courses-redis.js'
 import { clearCourseDetailsCache } from '../../redis/course-details-redis.js'
+import { cleanupLectureAssets } from '../../../lecture/services/teacher/cleanup-lecture-service.js'
 
 
 export const deleteCourseService = async (courseId) => {
@@ -18,6 +19,11 @@ export const deleteCourseService = async (courseId) => {
             'Course not found'
         )
     }
+
+    //background cleanup call
+    cleanupLectureAssets({courseId}).catch(error => {
+        logger.info(`Failed to clean up lecture assets on course delete for courseId=${courseId}:${error.message}`)
+    })
 
     await Promise.all([
         clearPublishedCoursesCache(),
