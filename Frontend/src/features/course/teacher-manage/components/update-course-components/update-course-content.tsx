@@ -20,6 +20,9 @@ const UpdateCourseContent: React.FC<UpdateCourseContentProps> = ({ courseId, cou
     removeSection,
     addLesson,
     removeLesson,
+    lessonToDelete,
+    confirmRemoveLesson,
+    cancelRemoveLesson,
     handleSubmit
   } = useCourseFormPage({
     mode: 'update',
@@ -41,6 +44,9 @@ const UpdateCourseContent: React.FC<UpdateCourseContentProps> = ({ courseId, cou
         onRemoveSection={removeSection}
         onAddLesson={addLesson}
         onRemoveLesson={removeLesson}
+        lessonToDelete={lessonToDelete}
+        onConfirmRemoveLesson={confirmRemoveLesson}
+        onCloseConfirmModal={cancelRemoveLesson}
         onSubmit={handleSubmit}
       />
     </section>

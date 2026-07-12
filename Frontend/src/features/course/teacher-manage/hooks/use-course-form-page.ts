@@ -24,6 +24,12 @@ export interface CourseFormPageState {
   formErrors: any
   isSubmitting: boolean
 
+  lessonToDelete: {
+    sectionIndex: number
+    lessonIndex: number
+    lessonTitle: string
+  } | null
+
   handleFieldChange: (name: keyof CourseFormValues, value: any) => void
   handleSectionTitleChange: (sectionIndex: number, value: string) => void
   handleLessonChange: (sectionIndex: number, lessonIndex: number, value: string) => void
@@ -31,6 +37,8 @@ export interface CourseFormPageState {
   removeSection: (sectionIndex: number) => void
   addLesson: (sectionIndex: number) => void
   removeLesson: (sectionIndex: number, lessonIndex: number) => void
+  confirmRemoveLesson: () => void
+  cancelRemoveLesson: () => void
   handleSubmit: (event: React.FormEvent<HTMLFormElement>) => Promise<void>
 }
 
@@ -49,6 +57,12 @@ export const useCourseFormPage = ({
   )
   const [formErrors, setFormErrors] = useState<any>({})
 
+  const [lessonToDelete, setLessonToDelete] = useState<{
+    sectionIndex: number
+    lessonIndex: number
+    lessonTitle: string
+  } | null>(null)
+
   const syncErrorsIfNeeded = (nextValues: CourseFormValues) => {
     if (Object.keys(formErrors).length > 0) {
       const result = validateCourseForm(nextValues)
@@ -61,7 +75,6 @@ export const useCourseFormPage = ({
       ...formValues,
       [name]: value
     }
-
     setFormValues(nextValues)
     syncErrorsIfNeeded(nextValues)
   }
@@ -70,17 +83,18 @@ export const useCourseFormPage = ({
     const nextValues = {
       ...formValues,
       syllabus: formValues.syllabus.map((section, index) =>
-        index === sectionIndex
-          ? { ...section, sectionTitle: value }
-          : section
+        index === sectionIndex ? { ...section, sectionTitle: value } : section
       )
     }
-
     setFormValues(nextValues)
     syncErrorsIfNeeded(nextValues)
   }
 
-  const handleLessonChange = (sectionIndex: number, lessonIndex: number, value: string) => {
+  const handleLessonChange = (
+    sectionIndex: number,
+    lessonIndex: number,
+    value: string
+  ) => {
     const nextValues = {
       ...formValues,
       syllabus: formValues.syllabus.map((section, index) =>
@@ -96,7 +110,6 @@ export const useCourseFormPage = ({
           : section
       )
     }
-
     setFormValues(nextValues)
     syncErrorsIfNeeded(nextValues)
   }
@@ -104,12 +117,8 @@ export const useCourseFormPage = ({
   const addSection = () => {
     const nextValues = {
       ...formValues,
-      syllabus: [
-        ...formValues.syllabus,
-        createEmptySection(formValues.syllabus.length + 1)
-      ]
+      syllabus: [...formValues.syllabus, createEmptySection(formValues.syllabus.length + 1)]
     }
-
     setFormValues(nextValues)
     syncErrorsIfNeeded(nextValues)
   }
@@ -123,7 +132,6 @@ export const useCourseFormPage = ({
       ...formValues,
       syllabus: formValues.syllabus.filter((_, index) => index !== sectionIndex)
     }
-
     setFormValues(nextValues)
     syncErrorsIfNeeded(nextValues)
   }
@@ -153,6 +161,18 @@ export const useCourseFormPage = ({
       return
     }
 
+    const lesson = formValues.syllabus[sectionIndex].lessons[lessonIndex]
+    setLessonToDelete({
+      sectionIndex,
+      lessonIndex,
+      lessonTitle: lesson.title || `Lesson ${lessonIndex + 1}`
+    })
+  }
+
+  const confirmRemoveLesson = () => {
+    if (!lessonToDelete) return
+    const { sectionIndex, lessonIndex } = lessonToDelete
+
     const nextValues = {
       ...formValues,
       syllabus: formValues.syllabus.map((section, index) =>
@@ -169,6 +189,11 @@ export const useCourseFormPage = ({
 
     setFormValues(nextValues)
     syncErrorsIfNeeded(nextValues)
+    setLessonToDelete(null)
+  }
+
+  const cancelRemoveLesson = () => {
+    setLessonToDelete(null)
   }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -193,7 +218,6 @@ export const useCourseFormPage = ({
           courseId: courseId || '',
           courseData: payload
         })
-
         showSuccess(response.message || 'Course updated successfully')
       }
 
@@ -209,6 +233,8 @@ export const useCourseFormPage = ({
     isSubmitting:
       createCourseMutation.isPending || updateCourseMutation.isPending,
 
+    lessonToDelete,
+
     handleFieldChange,
     handleSectionTitleChange,
     handleLessonChange,
@@ -216,6 +242,8 @@ export const useCourseFormPage = ({
     removeSection,
     addLesson,
     removeLesson,
+    confirmRemoveLesson,
+    cancelRemoveLesson,
     handleSubmit
   }
 }

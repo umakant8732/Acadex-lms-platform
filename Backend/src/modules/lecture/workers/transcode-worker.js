@@ -8,12 +8,15 @@ import {
 } from '../queues/transcode-queue.js'
 import { processExpiredUploadPendingCleanupJob } from './cleanup-expired-upload-pending-processor.js'
 import { processLectureTranscodeJob } from './transcode-processor.js'
+import { processPurgeLectureMediaJob } from './purge-lecture-media-processor.js'
 
 const lectureJobProcessors = {
   [LECTURE_TRANSCODE_JOBS.PROCESS_VIDEO]: processLectureTranscodeJob,
   [LECTURE_TRANSCODE_JOBS.CLEANUP_EXPIRED_UPLOAD_PENDING]:
-    processExpiredUploadPendingCleanupJob
+    processExpiredUploadPendingCleanupJob,
+  [LECTURE_TRANSCODE_JOBS.PURGE_LECTURE_MEDIA]: processPurgeLectureMediaJob
 }
+
 
 // Listens for lecture background jobs.
 export const lectureTranscodeWorker = new Worker(

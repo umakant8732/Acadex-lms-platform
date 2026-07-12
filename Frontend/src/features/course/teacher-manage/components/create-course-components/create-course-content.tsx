@@ -14,6 +14,9 @@ const CreateCourseContent: React.FC = () => {
     removeSection,
     addLesson,
     removeLesson,
+    lessonToDelete,
+    confirmRemoveLesson,
+    cancelRemoveLesson,
     handleSubmit
   } = useCourseFormPage({
     mode: 'create'
@@ -33,6 +36,9 @@ const CreateCourseContent: React.FC = () => {
         onRemoveSection={removeSection}
         onAddLesson={addLesson}
         onRemoveLesson={removeLesson}
+        lessonToDelete={lessonToDelete}
+        onConfirmRemoveLesson={confirmRemoveLesson}
+        onCloseConfirmModal={cancelRemoveLesson}
         onSubmit={handleSubmit}
       />
     </section>
