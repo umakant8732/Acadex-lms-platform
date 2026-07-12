@@ -8,8 +8,15 @@ export const useUpdateCourse = () => {
 
   return useMutation<UpdateCourseApiResponse, Error, UpdateCoursePayload>({
     mutationFn: updateCourseService,
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      // Invalidate the course lists query
       queryClient.invalidateQueries({ queryKey: courseQueryKeys.manageCoursesRoot })
+
+      // Invalidate the specific course details cache so that edits reflect in real time on return
+      if (variables.courseId) {
+        queryClient.invalidateQueries({ queryKey: courseQueryKeys.courseDetails(variables.courseId) })
+      }
     }
   })
 }
+
