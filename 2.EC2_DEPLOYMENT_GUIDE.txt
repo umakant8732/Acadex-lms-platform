@@ -230,6 +230,61 @@ What it does:
 - installs PM2 globally for background process management
 
 ===========================================================================
+7.1. CONFIGURE SWAP MEMORY (VIRTUAL RAM)
+===========================================================================
+
+Why it is mandatory:
+- Micro instances (like t2.micro or t3.micro) only have 1 GB of physical RAM.
+- Building the frontend using Vite (`npm run build`) is resource-intensive 
+  (involves code bundling, minification, tree-shaking, and type compilation).
+- If the compiler runs out of memory, the Node.js process freezes/stucks 
+  indefinitely at the `rendering chunks` phase or gets killed by the OS.
+- Setting up a 2 GB swap space acts as Virtual RAM on the SSD, allowing
+  Vite to compile the frontend assets smoothly without locks.
+
+Run these commands sequentially:
+
+1. Allocate 2 GB file size for swap:
+   sudo fallocate -l 2G /swapfile
+
+   What it does:
+   - fallocate reserves exactly 2 Gigabytes (2G) of disk block space at 
+     /swapfile to be used for pagination.
+
+2. Set read/write permissions to root only:
+   sudo chmod 600 /swapfile
+
+   What it does:
+   - chmod 600 restricts access to only the root owner (user who runs the system). 
+     Other users cannot read/write this virtual memory space (highly secure).
+
+3. Set up the file as a Linux swap area:
+   sudo mkswap /swapfile
+
+   What it does:
+   - mkswap formats the reserved file system block specifically as swap memory format.
+
+4. Enable swap memory:
+   sudo swapon /swapfile
+
+   What it does:
+   - swapon activates the virtual memory file immediately. The Linux OS kernel 
+     will now use this 2GB block dynamically whenever physical RAM fills up.
+
+5. Make swap permanent across system reboots:
+   echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+   What it does:
+   - Appends the mount parameters directly to /etc/fstab. When the EC2 instance 
+     restarts, the OS will auto-mount the swapfile at startup.
+
+Verify swap is successfully configured:
+   free -h
+
+   What it does:
+   - Shows the active system memory table. Verify the "Swap" row displays "2.0Gi".
+
+===========================================================================
 8. CLONE PROJECT ON EC2
 ===========================================================================
 
