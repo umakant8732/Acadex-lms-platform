@@ -316,6 +316,9 @@ AI Teacher Assistant
 [ ] AI tool calling from chat
 [ ] AI suggestions for course improvement
 
+Security / Session Management
+[ ] Implement Single Session Enforcement (prevent concurrent logins; warn on new device login, invalidate old session on continue)
+
 Deployment / Production Launch
 [x] Deploy frontend
 [x] Deploy backend
