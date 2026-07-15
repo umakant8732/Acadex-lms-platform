@@ -272,10 +272,10 @@ Payment Gateway Flow
 [x] Enrollment created after successful payment
 [x] Student access unlocked after successful payment
 [x] Student playback connected to real enrollment access
-[ ] Razorpay webhook integration after deployment
+[x] Razorpay webhook integration after deployment
 [ ] Payment retry UX polish
-[ ] Student invoices / receipt history
-[ ] Send invoice / purchase receipt email after successful course purchase
+[x] Student invoices / receipt history
+[x] Send invoice / purchase receipt email after successful course purchase
 
 Enrollment Module Foundation
 [x] Enrollment model

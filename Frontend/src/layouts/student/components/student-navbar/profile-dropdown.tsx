@@ -40,6 +40,10 @@ const ProfileDropdown: React.FC = () => {
             My Courses
           </Link>
 
+          <Link to='/student/invoices' className={menuItemClasses}>
+            Invoices
+          </Link>
+
           <button
             onClick={handleLogout}
             disabled={isPending}

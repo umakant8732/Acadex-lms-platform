@@ -34,3 +34,27 @@ export const sendForgotPasswordJob = async (email, otp) => {
     defaultEmailJobOptions
   )
 }
+
+export const sendInvoiceEmailJob = async ({
+  email,
+  fullName,
+  courseTitle,
+  price,
+  providerPaymentId,
+  receipt,
+  paidAt
+}) => {
+  return await authEmailQueue.add(
+    AUTH_EMAIL_JOBS.SEND_INVOICE,
+    {
+      email,
+      fullName,
+      courseTitle,
+      price,
+      providerPaymentId,
+      receipt,
+      paidAt
+    },
+    defaultEmailJobOptions
+  )
+}

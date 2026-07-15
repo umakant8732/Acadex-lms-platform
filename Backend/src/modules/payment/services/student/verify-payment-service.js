@@ -13,6 +13,9 @@ import { findPaymentAttemptById } from '../../repositories/find-payment-attempt-
 import { markPaymentAttemptFailed } from '../../repositories/mark-payment-attempt-failed-repository.js'
 import { markPaymentAttemptFulfilled } from '../../repositories/mark-payment-attempt-fulfilled-repository.js'
 import { markPaymentAttemptVerified } from '../../repositories/mark-payment-attempt-verified-repository.js'
+import User from '../../../auth/models/user-model.js'
+import Course from '../../../course/models/course-model.js'
+import { sendInvoiceEmailJob } from '../../../auth/jobs/auth-email-job.js'
 
 // Builds expected Razorpay signature using order id, payment id, and secret.
 const createExpectedSignature = ({ orderId, paymentId }) => {
@@ -141,6 +144,27 @@ export const verifyPaymentService = async ({
   logger.info(
     `Payment verified and enrollment created for paymentAttemptId=${fulfilledPaymentAttempt._id}`
   )
+
+  // Trigger receipt email sending via BullMQ queue
+  try {
+    const user = await User.findById(verifiedPaymentAttempt.userId)
+    const course = await Course.findById(verifiedPaymentAttempt.courseId)
+
+    if (user && course) {
+      await sendInvoiceEmailJob({
+        email: user.email,
+        fullName: user.fullName,
+        courseTitle: course.title,
+        price: fulfilledPaymentAttempt.amount,
+        providerPaymentId: fulfilledPaymentAttempt.providerPaymentId,
+        receipt: fulfilledPaymentAttempt.receipt,
+        paidAt: fulfilledPaymentAttempt.paidAt || new Date()
+      })
+      logger.info(`Verify Payment: Enqueued purchase receipt email to ${user.email}`)
+    }
+  } catch (error) {
+    logger.error(`Verify Payment Email Queue Error: ${error.message}`)
+  }
 
   return {
     enrollment,

@@ -8,6 +8,7 @@ import { ROLES } from '../../../auth/constants/auth-constants.js'
 import { createOrder } from '../../controllers/student/create-order-controller.js'
 import { verifyPayment } from '../../controllers/student/verify-payment-controller.js'
 import { reportPaymentFailure } from '../../controllers/student/report-payment-failure-controller.js'
+import { getInvoices } from '../../controllers/student/get-invoices-controller.js'
 
 const router = Router()
 
@@ -34,5 +35,8 @@ router.post(
   roleMiddleware(ROLES.STUDENT),
   reportPaymentFailure
 )
+
+
+router.get('/invoices', authMiddleware, roleMiddleware(ROLES.STUDENT), getInvoices)
 
 export default router

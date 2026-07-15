@@ -1,4 +1,4 @@
-import api from '../../../../shared/services/axios.js'
+import api from '../../../../../shared/services/axios.js'
 import type { PaymentOrder } from '../types/student-checkout-types'
 
 export interface CreatePaymentOrderResponse {
