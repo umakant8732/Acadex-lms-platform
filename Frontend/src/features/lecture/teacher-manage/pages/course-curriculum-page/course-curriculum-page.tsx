@@ -18,10 +18,10 @@ const CourseCurriculumPage: React.FC = () => {
     uploadingLessonIds,
 
     handleRetryTranscode,
-    isRetrying,
+    retryLoadingLectureId,
 
     selectedPlayback,
-    isPlaybackLoading,
+    playbackLoadingLectureId,
     handleWatchLecture,
     handleClosePlayback,
     handlePlaybackError
@@ -70,10 +70,10 @@ const CourseCurriculumPage: React.FC = () => {
         onVideoFileChange={handleVideoFileChange}
         uploadingLessonIds={uploadingLessonIds}
         uploadProgressByLessonId={uploadProgressByLessonId}
-        isPlaybackLoading={isPlaybackLoading}
+        playbackLoadingLectureId={playbackLoadingLectureId}
         onWatchLecture={handleWatchLecture}
         onRetryClick={handleRetryTranscode}
-        isRetrying={isRetrying}
+        retryLoadingLectureId={retryLoadingLectureId}
       />
 
       <LecturePreviewPlayer

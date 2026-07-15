@@ -10,10 +10,10 @@ export interface LectureCurriculumContentProps {
   onVideoFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void
   uploadingLessonIds?: string[]
   uploadProgressByLessonId?: Record<string, number>
-  isPlaybackLoading?: boolean
+  playbackLoadingLectureId?: string | null
   onWatchLecture?: (lesson: Lesson) => void
   onRetryClick?: (lecture: string) => void
-  isRetrying? : boolean
+  retryLoadingLectureId?: string | null
 }
 
 const LectureCurriculumContent: React.FC<LectureCurriculumContentProps> = ({
@@ -23,10 +23,10 @@ const LectureCurriculumContent: React.FC<LectureCurriculumContentProps> = ({
   onVideoFileChange,
   uploadingLessonIds = [],
   uploadProgressByLessonId = {},
-  isPlaybackLoading = false,
+  playbackLoadingLectureId = null,
   onWatchLecture,
   onRetryClick,
-  isRetrying = false
+  retryLoadingLectureId = null
 }) => {
   const { course, sections } = curriculum // Course with curriculum data to show on frontend.
 
@@ -71,10 +71,10 @@ const LectureCurriculumContent: React.FC<LectureCurriculumContentProps> = ({
                         isUploading={isCurrentLessonUploading}
                         uploadProgress={uploadProgress}
                         onUploadButtonClick={onUploadButtonClick}
-                        isPlaybackLoading={isPlaybackLoading}
+                        isPlaybackLoading={!!lesson.lecture?._id && playbackLoadingLectureId === lesson.lecture._id}
                         onWatchLecture={onWatchLecture}
                         onRetryClick={onRetryClick}
-                        isRetrying={isRetrying}
+                        isRetrying={!!lesson.lecture?._id && retryLoadingLectureId === lesson.lecture._id}
                       />
                     )
                   })

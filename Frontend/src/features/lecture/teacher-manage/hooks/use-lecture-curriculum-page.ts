@@ -47,12 +47,12 @@ export interface LectureCurriculumPageState {
   uploadingLessonIds: string[]
 
   selectedPlayback: PlaybackAccessResult | null
-  isPlaybackLoading: boolean
+  playbackLoadingLectureId : string | null
   handleWatchLecture: (lesson: Lesson) => Promise<void>
   handleClosePlayback: () => void
   handlePlaybackError: (message: string) => void
   handleRetryTranscode: (lectureId: string) => Promise<void>
-  isRetrying: boolean
+  retryLoadingLectureId: string | null
 }
 
 // Handles curriculum data and lecture upload flow.
@@ -219,12 +219,12 @@ export const useLectureCurriculumPage = (): LectureCurriculumPageState => {
     uploadingLessonIds,
 
     selectedPlayback,
-    isPlaybackLoading: playbackAccessMutation.isPending,
+    playbackLoadingLectureId: playbackAccessMutation.isPending ? playbackAccessMutation.variables : null,
     handleWatchLecture,
     handleClosePlayback,
     handlePlaybackError,
 
     handleRetryTranscode,
-    isRetrying: retryTranscodeMutation.isPending
+    retryLoadingLectureId: retryTranscodeMutation.isPending ? retryTranscodeMutation.variables?.lectureId : null
   }
 }
