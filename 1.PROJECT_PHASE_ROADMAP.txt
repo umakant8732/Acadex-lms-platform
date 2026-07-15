@@ -322,8 +322,8 @@ Deployment / Production Launch
 [x] Production environment variables setup
 [x] Production CORS and cookie verification
 [x] CloudFront production verification for videos and thumbnails
-[ ] Razorpay production key switch after KYC
-[ ] Razorpay webhook URL wiring
+[x] Razorpay production key switch after KYC
+[x] Razorpay webhook URL wiring
 [x] End-to-end production smoke test
 
 Final Phase 1 Polish

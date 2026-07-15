@@ -854,4 +854,3 @@ At the end of deployment, this is what we achieved:
 9. Domain works
 10. App survives reboot
 
-This is a clean, cost-effective, portfolio-friendly production deployment.
