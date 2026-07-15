@@ -893,6 +893,44 @@ Why:
 - backend remains internal behind reverse proxy
 
 ===========================================================================
+29.1. RAZORPAY WEBHOOK INTEGRATION SETUP
+===========================================================================
+
+To enable automatic student enrollment and invoice emailing after payment:
+
+1. Log in to Razorpay Dashboard:
+   - Navigate to https://dashboard.razorpay.com/
+   - Ensure the top-right toggle is set to "Live Mode" (or "Test Mode" if testing).
+
+2. Go to Webhook Settings:
+   - Click "Account & Settings" in the left sidebar.
+   - Select "Webhooks" under Website Settings.
+   - Click the "+ Add New Webhook" button.
+
+3. Fill out the Webhook Creation form:
+   - Webhook URL:
+     https://acadexlearning.xyz/api/v1/payment/webhook
+     (Nginx forwards public requests on /api/v1 to internal port 5000)
+   - Secret:
+     whsec_acadex_payment_2026_73d9d0fe
+     (Must match RAZORPAY_WEBHOOK_SECRET in backend .env for signature verify)
+   - Alert Email:
+     umakantbhendarkar94@gmail.com
+     (Receives failure notices if your server fails to return 200 OK)
+
+4. Select Active Events:
+   - Under Payment Events, select:
+     * payment.captured (triggered when payment is captured and verified)
+     * order.paid (triggered when full order amount is paid)
+
+5. Save the Webhook:
+   - Click "Create Webhook".
+
+Why:
+- Razorpay sends cryptographically signed events to this URL on payment completion.
+- The backend verifies the signature, unlocks the course, and queue invoice email.
+
+===========================================================================
 30. FINAL RESULT
 ===========================================================================
 
