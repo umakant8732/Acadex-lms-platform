@@ -55,12 +55,12 @@ export const createPresignedUploadUrlService = async payload => {
     lessonId
   })
 
-  if (existingLecture?.videoAssetId) {
-    throw new ApiError(
-      409,
-      'This lesson already has a video. Replace video flow will be added separately'
-    )
-  }
+  // if (existingLecture?.videoAssetId) {
+  //   throw new ApiError(
+  //     409,
+  //     'This lesson already has a video. Replace video flow will be added separately'
+  //   )
+  // }
 
   const originalKey = buildOriginalVideoS3Key({
     courseId,

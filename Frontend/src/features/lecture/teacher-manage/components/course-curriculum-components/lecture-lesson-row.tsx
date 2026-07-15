@@ -51,8 +51,10 @@ export interface LectureLessonRowProps {
   isUploading: boolean
   uploadProgress: number
   onUploadButtonClick: (args: { section: Section; lesson: Lesson }) => void
-  isPlaybackLoading?: boolean
+  isPlaybackLoading?: boolean,
   onWatchLecture?: (lesson: Lesson) => void
+  onRetryClick?: (lectureId: string) => void
+  isRetrying: boolean
 }
 
 const LectureLessonRow: React.FC<LectureLessonRowProps> = ({
@@ -62,7 +64,10 @@ const LectureLessonRow: React.FC<LectureLessonRowProps> = ({
   uploadProgress,
   onUploadButtonClick,
   isPlaybackLoading = false,
-  onWatchLecture
+  onWatchLecture,
+  onRetryClick,
+  isRetrying = false
+
 }) => {
   const lectureStatus = lesson.lecture?.status
   const isUploadDisabled =
@@ -92,6 +97,20 @@ const LectureLessonRow: React.FC<LectureLessonRowProps> = ({
             {isPlaybackLoading ? 'Opening' : 'Watch'}
           </button>
         )}
+
+        {
+          isLectureFailed(lectureStatus) &&
+          lesson.lecture?._id && (
+            <button
+              type='button'
+              disabled={isRetrying}
+              onClick={() => onRetryClick?.(lesson.lecture?._id || '')}
+              className='btn btn-outline rounded-none md:min-w-24 disabled:cursor-not-allowed'
+            >
+              {isRetrying ? 'Retrying...' : 'Retry'}
+            </button>
+          )
+        }
 
         <button
           type='button'

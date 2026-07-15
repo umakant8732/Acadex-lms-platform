@@ -29,7 +29,13 @@ export const isLectureFailed = (status?: LectureStatusType | null): boolean => {
   return status === LECTURE_STATUS.FAILED
 }
 
-// Current flow supports first upload only when lesson has no lecture status.
+
+//allows starting an upload if no video exists, or if it is ready (for replacing), or failed/pending
 export const canStartFirstLectureUpload = (status?: LectureStatusType | null): boolean => {
-  return !status
+  return (
+    !status ||
+    status === LECTURE_STATUS.READY ||
+    status === LECTURE_STATUS.FAILED ||
+    status === LECTURE_STATUS.UPLOAD_PENDING
+  )
 }

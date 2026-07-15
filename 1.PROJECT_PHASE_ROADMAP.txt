@@ -204,10 +204,13 @@ Lecture Module - Immediate Teacher Features
 [x] Basic teacher error toast messages for upload/playback failures
 
 Lecture Module - Later Reliability / Management
-[ ] Cleanup original/HLS S3 files on failed or replaced uploads
-[ ] Replace video flow for an existing lesson
-[ ] Delete lecture/video flow
-[ ] Retry failed processing flow
+[x] Cleanup original/HLS S3 files on failed or replaced uploads
+[x] Replace video flow for an existing lesson
+[x] Delete lecture/video flow (Lesson and Course deletion S3 & DB purging)
+[x] Custom warning confirmation modal for lesson deletion
+[x] S3 Media Cleanup background queue refactoring using BullMQ
+[x] Retry failed processing flow
+
 
 Lecture Module - Later Advanced Video Improvements
 [ ] Optional processing progress from worker using Redis

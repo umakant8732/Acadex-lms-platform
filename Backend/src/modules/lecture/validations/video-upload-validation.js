@@ -40,3 +40,9 @@ export const completeUploadSchema = z.object({
   //s3 object key where original uploaded video should exist.
   originalKey: z.string().trim().min(1, 'original key is required')
 })
+
+//validate required parameter for triggering transcode retry flow
+
+export const retryTranscodeSchema = z.object({
+  lectureId: mongoIdSchema
+})

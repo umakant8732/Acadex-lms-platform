@@ -10,12 +10,16 @@ import { useLectureStatusSocket } from './use-lecture-status-socket.js'
 import { useGetLecturePlaybackAccess } from '../queries/use-get-lecture-playback-access.js'
 import { showError, showSuccess } from '../../../../shared/utils/toast.js'
 import { getApiErrorMessage } from '../../../../shared/utils/get-api-error-message.js'
+import { useRetryLectureTranscode } from '../queries/use-retry-lecture-transcode.js'
+
+
 import type {
   TeacherCourseCurriculum,
   Section,
   Lesson,
   PlaybackAccessResult
 } from '../types/teacher-lecture-types'
+import { boolean } from 'zod'
 
 export interface UploadLessonArgs {
   section: Section
@@ -47,6 +51,8 @@ export interface LectureCurriculumPageState {
   handleWatchLecture: (lesson: Lesson) => Promise<void>
   handleClosePlayback: () => void
   handlePlaybackError: (message: string) => void
+  handleRetryTranscode: (lectureId: string) => Promise<void>
+  isRetrying: boolean
 }
 
 // Handles curriculum data and lecture upload flow.
@@ -63,6 +69,7 @@ export const useLectureCurriculumPage = (): LectureCurriculumPageState => {
   const curriculumQuery = useGetLectureCourseCurriculum(courseId)
   const presignedUploadUrlMutation = useCreateLecturePresignedUploadUrl()
   const completeUploadMutation = useCompleteLectureUpload()
+  const retryTranscodeMutation = useRetryLectureTranscode(courseId || '')
   const playbackAccessMutation = useGetLecturePlaybackAccess()
 
   // Creates signed url, uploads file to s3, then updates backend.
@@ -183,6 +190,20 @@ export const useLectureCurriculumPage = (): LectureCurriculumPageState => {
     setSelectedPlayback(null)
   }
 
+  //triggers transcode reprocessing on background Bullmq queue
+  const handleRetryTranscode = async (lectureId: string) => {
+    try {
+      await retryTranscodeMutation.mutateAsync({
+        lectureId
+      })
+
+      showSuccess('Transcoding retry started successfully')
+    } catch (error) {
+      showError(getApiErrorMessage(error, 'Unable to retry transcoding'))
+    }
+  }
+
+
   return {
     courseId,
     curriculum: curriculumQuery.data ?? null,
@@ -201,6 +222,9 @@ export const useLectureCurriculumPage = (): LectureCurriculumPageState => {
     isPlaybackLoading: playbackAccessMutation.isPending,
     handleWatchLecture,
     handleClosePlayback,
-    handlePlaybackError
+    handlePlaybackError,
+
+    handleRetryTranscode,
+    isRetrying: retryTranscodeMutation.isPending
   }
 }
