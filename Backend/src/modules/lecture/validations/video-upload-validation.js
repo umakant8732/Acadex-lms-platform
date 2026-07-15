@@ -4,7 +4,7 @@ const mongoIdSchema = z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid id')
 
 const allowedVideoMimeTypes = ['video/mp4', 'video/webm', 'video/quicktime']
 
-const MAX_VIDEO_UPLOAD_SIZE = 100 * 1024 * 1024 // 100 MB
+const MAX_VIDEO_UPLOAD_SIZE = 30 * 1024 * 1024 // 100 MB
 
 //use to validate required parameters for presigned url generation
 export const createPresignedUploadUrlSchema = z.object({
@@ -28,7 +28,8 @@ export const createPresignedUploadUrlSchema = z.object({
     .number()
     .int()
     .positive('File size must be greater than 0')
-    .max(MAX_VIDEO_UPLOAD_SIZE, 'Video size cannot be more than 100 MB')
+   .max(MAX_VIDEO_UPLOAD_SIZE, `Video size cannot be more than ${MAX_VIDEO_UPLOAD_SIZE / (1024 * 1024)} MB`)
+
 })
 
 //use to validate request body after frontend successfully uploads video  to s3.

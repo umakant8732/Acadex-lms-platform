@@ -47,7 +47,7 @@ export interface LectureCurriculumPageState {
   uploadingLessonIds: string[]
 
   selectedPlayback: PlaybackAccessResult | null
-  playbackLoadingLectureId : string | null
+  playbackLoadingLectureId: string | null
   handleWatchLecture: (lesson: Lesson) => Promise<void>
   handleClosePlayback: () => void
   handlePlaybackError: (message: string) => void
@@ -151,6 +151,24 @@ export const useLectureCurriculumPage = (): LectureCurriculumPageState => {
       setSelectedUploadTarget(null)
       return
     }
+
+    // Frontend validation for 0-byte file to prevent raw JSON error from backend validation
+    if (file.size === 0) {
+      showError('The selected video file is empty (0 bytes). Please upload a valid video file.')
+      event.target.value = ''
+      setSelectedUploadTarget(null)
+      return
+    }
+
+    // 2. Add 30 MB max size check (31457280 bytes)
+    const MAX_SIZE = 30 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      showError('Video file size exceeds the 30 MB limit. Please compress your video or upload a smaller one.')
+      event.target.value = ''
+      setSelectedUploadTarget(null)
+      return
+    }
+
 
     void handleUploadLesson({
       section: selectedUploadTarget.section,
