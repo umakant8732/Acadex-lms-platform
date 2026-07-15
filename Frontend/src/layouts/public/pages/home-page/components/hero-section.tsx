@@ -46,17 +46,13 @@ const HeroSection: React.FC = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className='mt-12 flex items-center justify-center gap-4'
+          className='mt-12 flex items-center justify-center'
         >
           <button
             onClick={handleScrollToCourses}
-            className='btn btn-neutral rounded-none px-8'
+            className='btn btn-neutral rounded-none px-8 py-3 text-xs uppercase tracking-widest font-bold transition-all hover:bg-black/90 hover:scale-[1.03] active:scale-95 shadow-md'
           >
             Explore Courses
-          </button>
-
-          <button className='btn btn-ghost rounded-none'>
-            Watch Demo
           </button>
         </motion.div>
       </div>

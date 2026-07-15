@@ -29,6 +29,22 @@ export const siteFooterNavigationLinks: NavigationLink[] = [
   {
     label: 'My Courses',
     to: '/student'
+  },
+  {
+    label: 'Terms of Service',
+    to: '/terms-of-service'
+  },
+  {
+    label: 'Privacy Policy',
+    to: '/privacy-policy'
+  },
+  {
+    label: 'Refund Policy',
+    to: '/refund-policy'
+  },
+  {
+    label: 'Contact Us',
+    to: '/contact-us'
   }
 ]
 
