@@ -54,7 +54,9 @@ export interface LectureLessonRowProps {
   isPlaybackLoading?: boolean,
   onWatchLecture?: (lesson: Lesson) => void
   onRetryClick?: (lectureId: string) => void
-  isRetrying: boolean
+  isRetrying: boolean,
+  onTogglePreview?: (lectureId: string, isPreview: boolean) => void
+  isTogglePreviewPending?: boolean
 }
 
 const LectureLessonRow: React.FC<LectureLessonRowProps> = ({
@@ -66,7 +68,9 @@ const LectureLessonRow: React.FC<LectureLessonRowProps> = ({
   isPlaybackLoading = false,
   onWatchLecture,
   onRetryClick,
-  isRetrying = false
+  isRetrying = false,
+  onTogglePreview,
+  isTogglePreviewPending = false
 
 }) => {
   const lectureStatus = lesson.lecture?.status
@@ -80,9 +84,10 @@ const LectureLessonRow: React.FC<LectureLessonRowProps> = ({
       <div>
         <p className='text-sm font-medium text-black'>{lesson.title}</p>
 
-        <div className='mt-2'>
+        <div className='mt-2 flex items-center gap-4'>
           <LectureStatusBadge status={lesson.lecture?.status} />
         </div>
+
       </div>
 
       <div className='flex flex-wrap gap-2 md:justify-end'>
@@ -125,6 +130,37 @@ const LectureLessonRow: React.FC<LectureLessonRowProps> = ({
             lectureStatus
           })}
         </button>
+
+        {lectureStatus === 'ready' && (
+          <label
+            className={`btn no-animation rounded-none pointer-events-auto cursor-default gap-3 font-normal border ${
+              lesson.lecture?.isPreview
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300'
+                : 'bg-rose-50 text-rose-600 border-rose-300 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-300'
+            }`}
+          >
+            <span className='text-xs font-semibold uppercase tracking-wider select-none'>
+              {lesson.lecture?.isPreview ? 'Preview Active' : 'Preview Off'}
+            </span>
+            <input
+              type='checkbox'
+              className={`toggle toggle-xs cursor-pointer ${
+                lesson.lecture?.isPreview ? 'toggle-success' : 'toggle-error'
+              }`}
+              disabled={isTogglePreviewPending}
+              checked={lesson.lecture?.isPreview ?? false}
+              onChange={(e) => {
+                console.log('hii');
+                if (lesson.lecture?._id) {
+                  onTogglePreview?.(lesson.lecture._id, e.target.checked)
+                }
+              }}
+            />
+          </label>
+        )}
+
+
+
       </div>
     </div>
   )

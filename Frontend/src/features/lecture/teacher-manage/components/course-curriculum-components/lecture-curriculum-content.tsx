@@ -14,6 +14,9 @@ export interface LectureCurriculumContentProps {
   onWatchLecture?: (lesson: Lesson) => void
   onRetryClick?: (lecture: string) => void
   retryLoadingLectureId?: string | null
+  onTogglePreview?: (lectureId: string, isPreview: boolean)=> void
+  isTogglePreviewPending? : boolean
+  
 }
 
 const LectureCurriculumContent: React.FC<LectureCurriculumContentProps> = ({
@@ -24,6 +27,8 @@ const LectureCurriculumContent: React.FC<LectureCurriculumContentProps> = ({
   uploadingLessonIds = [],
   uploadProgressByLessonId = {},
   playbackLoadingLectureId = null,
+  onTogglePreview,
+  isTogglePreviewPending = false,
   onWatchLecture,
   onRetryClick,
   retryLoadingLectureId = null
@@ -75,6 +80,8 @@ const LectureCurriculumContent: React.FC<LectureCurriculumContentProps> = ({
                         onWatchLecture={onWatchLecture}
                         onRetryClick={onRetryClick}
                         isRetrying={!!lesson.lecture?._id && retryLoadingLectureId === lesson.lecture._id}
+                        onTogglePreview={onTogglePreview}
+                        isTogglePreviewPending={isTogglePreviewPending}
                       />
                     )
                   })

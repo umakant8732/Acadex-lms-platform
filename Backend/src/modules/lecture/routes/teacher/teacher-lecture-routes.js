@@ -14,6 +14,10 @@ import { createPresignedUploadUrl } from '../../controllers/teacher/create-presi
 import { completeUpload } from '../../controllers/teacher/complete-upload-controller.js'
 import { getPlaybackAccess } from '../../controllers/shared/get-playback-access-controller.js'
 import { retryTranscode } from '../../controllers/teacher/retry-transcode-controller.js'
+import { togglePreviewLecture } from '../../controllers/teacher/toggle-preview-lecture-controller.js'
+import { toggleLecturePreviewSchema } from '../../validations/toggle-preview-lecture-validation.js'
+
+
 const router = Router()
 
 //teacher only routes
@@ -41,11 +45,36 @@ router.post(
 )
 
 
-router.post('/uploads/complete', authMiddleware, roleMiddleware(ROLES.TEACHER), validate(completeUploadSchema), completeUpload)
+router.post(
+  '/uploads/complete',
+  authMiddleware,
+  roleMiddleware(ROLES.TEACHER),
+  validate(completeUploadSchema),
+  completeUpload
+)
 
-router.post('/upload/retry', authMiddleware, roleMiddleware(ROLES.TEACHER), validate(retryTranscodeSchema), retryTranscode)
+router.post(
+  '/upload/retry',
+  authMiddleware,
+  roleMiddleware(ROLES.TEACHER),
+  validate(retryTranscodeSchema),
+  retryTranscode
+)
 
-router.get('/playback-access/:lectureId', authMiddleware, roleMiddleware(ROLES.TEACHER), getPlaybackAccess)
+router.get(
+  '/playback-access/:lectureId',
+  authMiddleware,
+  roleMiddleware(ROLES.TEACHER),
+  getPlaybackAccess
+)
+
+router.patch(
+  '/preview',
+  authMiddleware,
+  roleMiddleware(ROLES.TEACHER),
+  validate(toggleLecturePreviewSchema),
+  togglePreviewLecture
+)
 
 
 export default router

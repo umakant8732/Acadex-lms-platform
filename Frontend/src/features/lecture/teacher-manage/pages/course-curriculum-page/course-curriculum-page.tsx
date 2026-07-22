@@ -24,7 +24,10 @@ const CourseCurriculumPage: React.FC = () => {
     playbackLoadingLectureId,
     handleWatchLecture,
     handleClosePlayback,
-    handlePlaybackError
+    handlePlaybackError,
+
+    handleTogglePreview,
+    isTogglePreviewPending
   } = useLectureCurriculumPage()
 
   if (isLoading) {
@@ -74,6 +77,8 @@ const CourseCurriculumPage: React.FC = () => {
         onWatchLecture={handleWatchLecture}
         onRetryClick={handleRetryTranscode}
         retryLoadingLectureId={retryLoadingLectureId}
+        onTogglePreview={handleTogglePreview}
+        isTogglePreviewPending={isTogglePreviewPending}
       />
 
       <LecturePreviewPlayer

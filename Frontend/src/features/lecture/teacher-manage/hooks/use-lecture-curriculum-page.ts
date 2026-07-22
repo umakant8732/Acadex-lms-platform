@@ -11,6 +11,7 @@ import { useGetLecturePlaybackAccess } from '../queries/use-get-lecture-playback
 import { showError, showSuccess } from '../../../../shared/utils/toast.js'
 import { getApiErrorMessage } from '../../../../shared/utils/get-api-error-message.js'
 import { useRetryLectureTranscode } from '../queries/use-retry-lecture-transcode.js'
+import { useTogglePreviewLecture } from '../queries/use-toggle-preview-lecture.js'
 
 
 import type {
@@ -19,7 +20,6 @@ import type {
   Lesson,
   PlaybackAccessResult
 } from '../types/teacher-lecture-types'
-import { boolean } from 'zod'
 
 export interface UploadLessonArgs {
   section: Section
@@ -53,6 +53,8 @@ export interface LectureCurriculumPageState {
   handlePlaybackError: (message: string) => void
   handleRetryTranscode: (lectureId: string) => Promise<void>
   retryLoadingLectureId: string | null
+  handleTogglePreview: (lectureId: string, isPreview: boolean) => Promise<void>
+  isTogglePreviewPending: boolean
 }
 
 // Handles curriculum data and lecture upload flow.
@@ -71,6 +73,7 @@ export const useLectureCurriculumPage = (): LectureCurriculumPageState => {
   const completeUploadMutation = useCompleteLectureUpload()
   const retryTranscodeMutation = useRetryLectureTranscode(courseId || '')
   const playbackAccessMutation = useGetLecturePlaybackAccess()
+  const togglePreviewMutation = useTogglePreviewLecture(courseId || '')
 
   // Creates signed url, uploads file to s3, then updates backend.
   const handleUploadLesson = async ({ section, lesson, file }: UploadLessonArgs) => {
@@ -221,6 +224,15 @@ export const useLectureCurriculumPage = (): LectureCurriculumPageState => {
     }
   }
 
+  const handleTogglePreview = async (lectureId: string, isPreview: boolean) => {
+    try {
+      await togglePreviewMutation.mutateAsync({ lectureId, isPreview })
+      showSuccess('Preview status updated successfully')
+
+    } catch (error) {
+      showError(getApiErrorMessage(error, 'Unable to update preview status'))
+    }
+  }
 
   return {
     courseId,
@@ -243,6 +255,10 @@ export const useLectureCurriculumPage = (): LectureCurriculumPageState => {
     handlePlaybackError,
 
     handleRetryTranscode,
-    retryLoadingLectureId: retryTranscodeMutation.isPending ? retryTranscodeMutation.variables?.lectureId : null
+    retryLoadingLectureId: retryTranscodeMutation.isPending ? retryTranscodeMutation.variables?.lectureId : null,
+
+    handleTogglePreview,
+    isTogglePreviewPending: togglePreviewMutation.isPending
+
   }
 }

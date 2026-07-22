@@ -11,6 +11,7 @@ export interface Lecture {
   status: LectureStatusType
   hlsMasterKey?: string
   errorMessage?: string
+  isPreview?: boolean
 }
 
 export interface Lesson {
@@ -91,4 +92,10 @@ export interface LectureStatusChangedPayload {
   status: LectureStatusType
   hlsMasterKey?: string
   errorMessage?: string
+}
+
+
+export interface TogglePreviewLecturePayload {
+  lectureId : string,
+  isPreview : boolean
 }

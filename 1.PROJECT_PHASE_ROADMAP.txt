@@ -210,7 +210,7 @@ Lecture Module - Later Reliability / Management
 [x] Custom warning confirmation modal for lesson deletion
 [x] S3 Media Cleanup background queue refactoring using BullMQ
 [x] Retry failed processing flow
-[ ] Add "Previewable" toggle button in Teacher Curriculum manager UI (currently toggling isPreview directly in DB)
+[x] Add "Previewable" toggle button in Teacher Curriculum manager UI (currently toggling isPreview directly in DB)
 
 Lecture Module - Later Advanced Video Improvements
 [ ] Optional processing progress from worker using Redis
