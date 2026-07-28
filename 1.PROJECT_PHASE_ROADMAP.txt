@@ -306,15 +306,30 @@ Analytics
 [ ] Lecture watch analytics
 [ ] Student progress analytics
 
-AI Teacher Assistant
-[ ] LangChain setup
-[ ] LangSmith tracing setup
-[ ] Groq model integration
-[ ] Teacher AI chat UI
-[ ] AI tools for course analytics
-[ ] AI tools for lecture/course lookup
-[ ] AI tool calling from chat
-[ ] AI suggestions for course improvement
+AI INTEGRATION MODULE (LANGCHAIN + AGENTIC AI)
+[ ] Phase 1 - Basic Chat API Setup & Chat UI (Foundations)
+    [ ] Backend Express API integration for LLM (Gemini/Groq)
+    [ ] Base System Prompt configuration & instructions
+    [ ] Frontend Chat Assistant panel component
+    [ ] Conversational memory state management
+[ ] Phase 2 - AI Course Co-Pilot (Structured Outputs)
+    [ ] Zod schema definitions for course outline JSON
+    [ ] structuredOutput integration in LangChain
+    [ ] Backend API to generate formatted syllabus JSON
+    [ ] Frontend One-Click Generate button to auto-fill forms
+[ ] Phase 3 - Conversational DB Analytics (Agentic Tool Calling)
+    [ ] Mongoose database query tools (revenue, enrollments, pricing details)
+    [ ] createToolCallingAgent reasoning loop setup
+    [ ] LLM autonomous function execution validation
+[ ] Phase 4 - In-Video Semantic Search (RAG & Embeddings)
+    [ ] Whisper audio transcription in BullMQ worker
+    [ ] Vector database configuration & chunk embeddings storage
+    [ ] Semantic search backend Q&A service
+    [ ] Clickable timestamp seeks in student video player UI
+[ ] Phase 5 - Multi-Agent conversational workflows (LangGraph)
+    [ ] LangGraph state definition & routing nodes
+    [ ] Support router agent (Academic vs Billing vs Sales)
+
 
 Security / Session Management
 [ ] Implement Single Session Enforcement (prevent concurrent logins; warn on new device login, invalidate old session on continue)
