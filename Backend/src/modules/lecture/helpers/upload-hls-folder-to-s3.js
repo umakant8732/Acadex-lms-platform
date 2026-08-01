@@ -30,28 +30,39 @@ const getHlsContentType = fileName => {
 export const uploadHlsFolderToS3 = async ({ hlsOutputDir, hlsBaseKey }) => {
   // Get local HLS files, like master.m3u8 and segment_000.ts.
   const fileNames = await readdir(hlsOutputDir)
+  const uploadedFiles = []
 
-  // Upload all generated HLS files to the same S3 HLS folder.
-  const uploadedFiles = await Promise.all(
-    fileNames.map(async fileName => {
-      const localFilePath = path.join(hlsOutputDir, fileName)
-      const s3Key = `${hlsBaseKey}/${fileName}`
+  // Traffic signal setup: Max 5 concurrent uploads at a time
+  const BATCH_SIZE = 5
 
-      await s3Client.send(
-        new PutObjectCommand({
-          Bucket: s3BucketName,
-          Key: s3Key,
-          Body: createReadStream(localFilePath),
-          ContentType: getHlsContentType(fileName)
-        })
-      )
+  for (let i = 0; i < fileNames.length; i += BATCH_SIZE) {
+    const batch = fileNames.slice(i, i + BATCH_SIZE)
 
-      return {
-        fileName,
-        key: s3Key
-      }
-    })
-  )
+    // Process current batch of 5 files in parallel
+    const batchResults = await Promise.all(
+      batch.map(async fileName => {
+        const localFilePath = path.join(hlsOutputDir, fileName)
+        const s3Key = `${hlsBaseKey}/${fileName}`
+
+        await s3Client.send(
+          new PutObjectCommand({
+            Bucket: s3BucketName,
+            Key: s3Key,
+            Body: createReadStream(localFilePath),
+            ContentType: getHlsContentType(fileName)
+          })
+        )
+
+        return {
+          fileName,
+          key: s3Key
+        }
+      })
+    )
+
+    // Collect results of the uploaded batch
+    uploadedFiles.push(...batchResults)
+  }
 
   // Master playlist is the entry file that player will load later.
   const masterPlaylist = uploadedFiles.find(

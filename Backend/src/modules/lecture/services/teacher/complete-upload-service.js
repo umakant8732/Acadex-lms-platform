@@ -72,25 +72,29 @@ export const completeUploadService = async payload => {
     logger.info(`Replaced video flow: Detected ${oldVideoAssets.length} old video assets to cleanup...`)
   }
 
-  //purge old assets from s3 and  mongodb in  the background
+  //purge old assets from s3 and  mongodb sequentially to prevent s3 socket contention
   for(const oldAsset of oldVideoAssets){
     if(oldAsset.originalKey){
-      deleteS3Object(oldAsset.originalKey).catch(error => {
+      try {
+        await deleteS3Object(oldAsset.originalKey)
+      } catch (error) {
         logger.error(`Replace Video Flow: Failed to delete old raw video: ${error.message}`)
-      })
+      }
     }
 
     if(oldAsset.hlsMasterKey){
       const hlsFolder = getFolderPrefix(oldAsset.hlsMasterKey)
       if(hlsFolder){
-        deleteS3Directory(hlsFolder).catch(error => {
+        try {
+          await deleteS3Directory(hlsFolder)
+        } catch (error) {
           logger.error(`Replace Video Flow: Failed to delete old HLS folder: ${error.message}`)
-        })
+        }
       }
     }
 
     await VideoAsset.findByIdAndDelete(oldAsset._id)
-     logger.info(`Replace Video Flow: Deleted old VideoAsset DB record: ${oldAsset._id}`)
+    logger.info(`Replace Video Flow: Deleted old VideoAsset DB record: ${oldAsset._id}`)
   }
 
 

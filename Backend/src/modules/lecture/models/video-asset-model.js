@@ -99,6 +99,31 @@ const videoAssetSchema = new mongoose.Schema(
       min: 0
     },
 
+    // Original video specifications and specs
+    width: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+
+    height: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+
+    codec: {
+      type: String,
+      default: '',
+      trim: true
+    },
+
+    bitrate: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+
     // Stores generated HLS variants such as 360p, 720p etc
     variants: {
       type: [videoVariantSchema],

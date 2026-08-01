@@ -1,27 +1,21 @@
 import express from 'express'
 
-import cors from 'cors'
-
 import helmet from 'helmet'
 
 import morgan from 'morgan'
 
 import cookieParser from 'cookie-parser'
 
-import mongoSanitize from 'express-mongo-sanitize'
-
 import compression from 'compression'
 
 import hpp from 'hpp'
-
-import rateLimit from 'express-rate-limit'
 
 import routes from '../routes/app-routes.js'
 
 import errorMiddleware from '../middlewares/error-middleware.js'
 
 import { env } from '../config/env.js'
-import { isAllowedClientOrigin } from '../config/client-origins.js'
+import { corsMiddleware } from '../config/cors.js'
 import { globalLimiter } from '../middlewares/rate-limit-middleware.js'
 
 const app = express()
@@ -32,18 +26,7 @@ if (env.NODE_ENV === 'production') {
 }
 
 // Allows local tools without origin and trusted frontend apps with cookies.
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || isAllowedClientOrigin(origin)) {
-        return callback(null, true)
-      }
-
-      return callback(new Error(`CORS blocked for origin: ${origin}`))
-    },
-    credentials: true
-  })
-)
+app.use(corsMiddleware)
 
 // SECURITY HEADERS
 app.use(helmet())

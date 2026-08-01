@@ -1,18 +1,13 @@
 import { logger } from '../../../utils/logger.js'
 
-import {
-  LECTURE_STATUS,
-  VIDEO_ASSET_STATUS
-} from '../constants/lecture-constants.js'
-import { updateLectureById } from '../repositories/update-lecture-repository.js'
-import { updateVideoAssetById } from '../repositories/update-video-asset-repository.js'
 import { createTranscodeWorkDir } from '../helpers/create-transcode-work-dir.js'
 import { downloadS3ObjectToFile } from '../helpers/download-s3-object-to-file.js'
 import { transcodeVideoToHls } from '../helpers/transcode-video-to-hls.js'
 import { buildHlsS3BaseKey } from '../helpers/build-s3-key.js'
 import { uploadHlsFolderToS3 } from '../helpers/upload-hls-folder-to-s3.js'
 import { removeTranscodeWorkDir } from '../helpers/remove-transcode-work-dir.js'
-import { publishLectureStatusChanged } from '../sockets/lecture-status-pubsub.js'
+import { saveTranscodeSuccess, saveTranscodeFailure } from '../helpers/save-transcode-results.js'
+import { getVideoMetadata } from '../helpers/get-video-metadata.js'
 
 const isFinalJobAttempt = job => {
   const maxAttempts = job.opts?.attempts ?? 1
@@ -20,9 +15,9 @@ const isFinalJobAttempt = job => {
   return job.attemptsMade + 1 >= maxAttempts
 }
 
-// Runs one lecture video processing job.
 export const processLectureTranscodeJob = async job => {
   const { lectureId, videoAssetId, sourceKey, courseId, lessonId } = job.data
+  let activeWorkDir = null
 
   try {
     // Start processing for uploaded source video.
@@ -37,6 +32,7 @@ export const processLectureTranscodeJob = async job => {
       lectureId,
       videoAssetId
     })
+    activeWorkDir = workDir
 
     // Download original video from S3 into temp input file.
     await downloadS3ObjectToFile({
@@ -45,6 +41,13 @@ export const processLectureTranscodeJob = async job => {
     })
 
     logger.info(`Original video downloaded: ${inputFilePath}`)
+
+    // Extract dynamic duration and specs using ffprobe
+    const metadata = await getVideoMetadata(inputFilePath)
+    logger.info(
+      `Video details: duration=${metadata.duration}s, resolution=${metadata.width}x${metadata.height}, codec=${metadata.codec}, bitrate=${metadata.bitrate}`
+    )
+
     logger.info(`HLS output folder ready: ${hlsOutputDir}`)
 
     // Convert downloaded original video into local HLS files.
@@ -71,43 +74,21 @@ export const processLectureTranscodeJob = async job => {
     logger.info(`HLS files uploaded to s3 : ${uploadedFiles.length}`)
     logger.info(`HLS master key: ${hlsMasterKey}`)
 
-    // Save playable master playlist key and mark video ready.
-    const updatedVideoAsset = await updateVideoAssetById(videoAssetId, {
-      hlsMasterKey,
-      status: VIDEO_ASSET_STATUS.READY,
-      errorMessage: ''
-    })
-
-    // Mark lecture ready after HLS files are uploaded.
-    const updatedLecture = await updateLectureById(lectureId, {
-      status: LECTURE_STATUS.READY
-    })
-
-    logger.info(
-      `Lecture video ready: lecture=${lectureId}, asset=${videoAssetId}`
-    )
-
-    // Worker cannot emit socket directly, so it publishes via Redis.
-    await publishLectureStatusChanged({
+    // Save playable master playlist key and mark video ready in DB / sockets.
+    const { updatedLecture, updatedVideoAsset } = await saveTranscodeSuccess({
+      lectureId,
+      videoAssetId,
       courseId,
       lessonId,
-      lectureId: updatedLecture._id,
-      videoAssetId: updatedVideoAsset._id,
-      status: LECTURE_STATUS.READY,
-      hlsMasterKey: updatedVideoAsset.hlsMasterKey,
-      errorMessage: ''
+      hlsMasterKey,
+      metadata
     })
-
-    // Remove local files after successful S3 upload and DB update.
-    await removeTranscodeWorkDir(workDir)
-
-    logger.info(`Local transcode folder removed: ${workDir}`)
 
     return {
       lectureId,
       videoAssetId,
       sourceKey,
-      workDir,
+      workDir: activeWorkDir,
       inputFilePath,
       hlsOutputDir,
       masterPlaylistPath,
@@ -128,27 +109,24 @@ export const processLectureTranscodeJob = async job => {
       throw error
     }
 
-    // Mark failed only after all retry attempts are exhausted.
-    // Before final attempt, BullMQ will retry so UI should stay Processing.
-    const failedVideoAsset = await updateVideoAssetById(videoAssetId, {
-      status: VIDEO_ASSET_STATUS.FAILED,
-      errorMessage: error.message
-    })
-
-    const failedLecture = await updateLectureById(lectureId, {
-      status: LECTURE_STATUS.FAILED
-    })
-
-    // Worker publishes failed state through Redis so current page updates live.
-    await publishLectureStatusChanged({
+    // Mark failed and publish failed state.
+    await saveTranscodeFailure({
+      lectureId,
+      videoAssetId,
       courseId,
       lessonId,
-      lectureId: failedLecture._id,
-      videoAssetId: failedVideoAsset._id,
-      status: LECTURE_STATUS.FAILED,
       errorMessage: error.message
     })
 
     throw error
+  } finally {
+    if (activeWorkDir) {
+      try {
+        await removeTranscodeWorkDir(activeWorkDir)
+        logger.info(`Local transcode folder cleaned up: ${activeWorkDir}`)
+      } catch (cleanupError) {
+        logger.error(`Failed to clean up transcode folder: ${cleanupError.message}`)
+      }
+    }
   }
 }
