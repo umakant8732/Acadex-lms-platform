@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 
 import {
   getCourseDiscount,
-  getTotalLessons,
 } from "../../../../../shared/utils/course/calculate-course-pricing";
 import { formatCoursePrice } from "../../../../../shared/utils/course/format-course-price";
 
@@ -11,9 +10,8 @@ const StudentCourseCard = ({ course }) => {
   const navigate = useNavigate();
   const courseDiscount = getCourseDiscount(course.price, course.originalPrice);
 
-  const totalLessons = getTotalLessons(course.syllabus);
   const courseThumbnail = course.thumbnail?.trim();
-  const courseSummary = course.subtitle || course.description;
+  const courseSummary = course.description;
   const access = course.access;
   const preview = course.preview;
   const courseOverviewPath = `/student/courses/${course._id}`;
@@ -21,7 +19,6 @@ const StudentCourseCard = ({ course }) => {
     !access.isPurchased && preview.firstPreviewLessonId,
   );
   const hasPreviewLessons = Boolean(preview.hasPreviewLessons);
-  const hasReadyPreviewLessons = Boolean(preview.readyPreviewLessonsCount);
 
   const primaryActionPath = access.isPurchased
     ? `/student/courses/${course._id}/learn`
@@ -64,7 +61,7 @@ const StudentCourseCard = ({ course }) => {
       tabIndex={0}
       onClick={handleCardClick}
       onKeyDown={handleCardKeyDown}
-      className="flex h-full cursor-pointer flex-col overflow-hidden border border-black/5 bg-white"
+      className="flex h-full cursor-pointer flex-col overflow-hidden border border-black/10 bg-white transition-all duration-300 hover:shadow-lg"
     >
       <div className="overflow-hidden border-b border-black/5">
         {courseThumbnail ? (
@@ -86,14 +83,20 @@ const StudentCourseCard = ({ course }) => {
 
       <div className="flex flex-1 flex-col p-6">
         <div className="flex items-center justify-between gap-3">
-          <span className="text-xs uppercase tracking-widest text-black/40">
+          <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-black/45">
             {course.category || "General"}
           </span>
 
-          {courseDiscount > 0 && (
-            <span className="shrink-0 text-sm font-medium">
-              {courseDiscount}% OFF
+          {access.isPurchased ? (
+            <span className="shrink-0 rounded-sm border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
+              Enrolled
             </span>
+          ) : (
+            courseDiscount > 0 && (
+              <span className="shrink-0 rounded-sm border border-rose-100 bg-rose-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-rose-600">
+                {courseDiscount}% OFF
+              </span>
+            )
           )}
         </div>
 
@@ -106,44 +109,21 @@ const StudentCourseCard = ({ course }) => {
             "Explore this published course and unlock the full learning path."}
         </p>
 
-        <div className="mt-5 min-h-[2.5rem] content-start flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.2em] text-black/40">
-          <span>{course.level || "Course"}</span>
-          <span>{totalLessons} lessons</span>
-          {access.isPurchased && (
-            <span>{access.progressPercent ?? 0}% complete</span>
-          )}
-          {!access.isPurchased && hasReadyPreviewLessons && (
-            <span>{preview.readyPreviewLessonsCount} preview ready</span>
-          )}
-        </div>
 
-        <div className="mt-6 flex items-end gap-3">
-          <span className="text-3xl font-semibold">
-            {formatCoursePrice(course.price)}
-          </span>
-
-          {course.originalPrice > course.price && (
-            <span className="pb-1 text-black/30 line-through">
-              {formatCoursePrice(course.originalPrice)}
+        {!access.isPurchased && (
+          <div className="mt-6 flex items-end gap-3">
+            <span className="text-3xl font-semibold text-black">
+              {formatCoursePrice(course.price)}
             </span>
-          )}
-        </div>
 
-        <div className="mt-4 flex min-h-[2.25rem] flex-wrap items-center gap-2 text-xs uppercase tracking-[0.16em] text-sky-700">
-          {!access.isPurchased && hasPreviewLessons && (
-            <>
-              <span className="border border-sky-200 bg-sky-50 px-2 py-1">
-                {hasReadyPreviewLessons
-                  ? "Preview available"
-                  : "Preview coming soon"}
+            {course.originalPrice > course.price && (
+              <span className="pb-1 text-black/30 line-through">
+                {formatCoursePrice(course.originalPrice)}
               </span>
+            )}
+          </div>
+        )}
 
-              {hasReadyPreviewLessons && (
-                <span>{preview.readyPreviewLessonsCount} ready now</span>
-              )}
-            </>
-          )}
-        </div>
 
         <div className="mt-auto pt-7">
           <Link

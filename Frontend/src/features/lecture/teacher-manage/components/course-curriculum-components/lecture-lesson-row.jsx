@@ -1,4 +1,3 @@
-import React from "react";
 import { FiPlayCircle, FiUploadCloud } from "react-icons/fi";
 
 import {
@@ -32,7 +31,7 @@ const getUploadButtonLabel = ({
   }
 
   if (isLectureFailed(lectureStatus)) {
-    return "Upload Failed";
+    return "Re-upload Video";
   }
 
   return "Upload Video";
@@ -55,7 +54,7 @@ const LectureLessonRow = ({
   const isUploadDisabled =
     isUploading || !canStartFirstLectureUpload(lectureStatus);
 
-  const canWatchLecture = isLectureReady(lectureStatus);
+  const canWatchLecture = isLectureReady(lectureStatus) && !isUploading;
 
   return (
     <div className="flex flex-col gap-4 border-b border-black/5 px-5 py-4 last:border-b-0 md:flex-row md:items-center md:justify-between">
@@ -63,7 +62,7 @@ const LectureLessonRow = ({
         <p className="text-sm font-medium text-black">{lesson.title}</p>
 
         <div className="mt-2 flex items-center gap-4">
-          <LectureStatusBadge status={lesson.lecture?.status} />
+          <LectureStatusBadge status={isUploading ? "uploading" : lesson.lecture?.status} />
         </div>
       </div>
 
@@ -121,7 +120,7 @@ const LectureLessonRow = ({
               className={`toggle toggle-xs cursor-pointer ${
                 lesson.lecture?.isPreview ? "toggle-success" : "toggle-error"
               }`}
-              disabled={isTogglePreviewPending}
+              disabled={isTogglePreviewPending || isUploading}
               checked={lesson.lecture?.isPreview ?? false}
               onChange={(e) => {
                 console.log("hii");

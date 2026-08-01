@@ -46,20 +46,13 @@ const StudentCourseOverviewHero = ({
         </div>
 
         <div className="space-y-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <Link
-              to="/student"
-              className="text-sm font-medium text-black/55 transition hover:text-black"
-            >
-              Back to courses
-            </Link>
-
-            {expiryText && (
+          {expiryText && (
+            <div className="flex justify-end">
               <span className="border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-amber-700">
                 Expires {expiryText}
               </span>
-            )}
-          </div>
+            </div>
+          )}
 
           <div className="space-y-3">
             <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-black">
@@ -78,54 +71,27 @@ const StudentCourseOverviewHero = ({
             </div>
           </div>
 
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0 flex-1">
-              {isPurchased ? (
-                <div className="space-y-3">
-                  <p className="text-sm text-black/60">
-                    Overall progress {course.access.progressPercent ?? 0}%
-                  </p>
+              {!isPurchased && (
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl font-semibold text-black">
+                    {formatCoursePrice(course.price)}
+                  </span>
 
-                  <div className="h-2.5 overflow-hidden bg-black/10">
-                    <div
-                      className="h-full bg-[#16a34a]"
-                      style={{
-                        width: `${course.access.progressPercent ?? 0}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <div className="flex items-end gap-3">
-                    <span className="text-3xl font-semibold text-black">
-                      {formatCoursePrice(course.price)}
-                    </span>
-
-                    {course.originalPrice > course.price && (
-                      <span className="pb-1 text-black/30 line-through">
+                  {course.originalPrice > course.price && (
+                    <>
+                      <span className="pb-0.5 text-black/30 line-through text-lg">
                         {formatCoursePrice(course.originalPrice)}
                       </span>
-                    )}
-                  </div>
-
-                  <p className="text-sm text-black/60">
-                    {canWatchPreview
-                      ? "You can start with free preview lessons right away, then unlock the full course whenever you are ready."
-                      : hasPreviewLessons
-                        ? "Preview lessons exist, but they are still being prepared. You can unlock the full course right now."
-                        : "Purchase access is needed to unlock lesson playback for this course."}
-                  </p>
-
-                  {hasPreviewLessons && (
-                    <div className="inline-flex items-center gap-2 border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-medium uppercase tracking-[0.16em] text-sky-700">
-                      <span>
-                        {canWatchPreview
-                          ? "Preview access available"
-                          : "Preview is preparing"}
+                      <span className="shrink-0 rounded-sm border border-rose-100 bg-rose-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-rose-600">
+                        {Math.round(
+                          ((course.originalPrice - course.price) /
+                            course.originalPrice) *
+                            100
+                        )}% OFF
                       </span>
-                      <span>{contentStats.previewLessons} preview lessons</span>
-                    </div>
+                    </>
                   )}
                 </div>
               )}
