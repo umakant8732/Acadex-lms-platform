@@ -1,4 +1,4 @@
-import apiClient from "../../../shared/services/axios";
+import apiClient from "@/shared/services/axios";
 
 //calls backend to resend verification otp
 export const resendOtpApi = async (payload) => {

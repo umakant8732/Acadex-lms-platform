@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { showInfo } from "../../../../shared/utils/toast";
+import { showInfo } from "@/shared/utils/toast";
 
 const navItems = [
   {

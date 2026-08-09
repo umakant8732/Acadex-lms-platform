@@ -11,9 +11,9 @@ import {
 } from "../services/auth-storage";
 import { verifyEmailSchema } from "../validations/verify-email-schema";
 import { setUser, useAppDispatch } from "../../../app/store";
-import { getPostLoginRedirectPath } from "../../../shared/utils/auth-redirect";
-import { showError, showSuccess } from "../../../shared/utils/toast";
-import { getZodErrors } from "../../../shared/utils/zod";
+import { getPostLoginRedirectPath } from "@/shared/utils/auth-redirect";
+import { showError, showSuccess } from "@/shared/utils/toast";
+import { getZodErrors } from "@/shared/utils/zod";
 import { useResendOtp } from "../queries/use-resend-otp";
 
 // Handles OTP input state and email-verification submit flow.

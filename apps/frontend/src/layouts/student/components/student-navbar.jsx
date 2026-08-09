@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { HiBars3BottomRight, HiXMark } from "react-icons/hi2";
 
-import AppLogo from "../../../shared/ui/app-shell/app-logo";
-import TopbarShell from "../../../shared/ui/app-shell/topbar-shell";
+import AppLogo from "@/shared/ui/app-shell/app-logo";
+import TopbarShell from "@/shared/ui/app-shell/topbar-shell";
 import NavLinks from "./student-navbar/nav-links";
 import NotificationButton from "./student-navbar/notification-button";
 import ProfileDropdown from "./student-navbar/profile-dropdown";

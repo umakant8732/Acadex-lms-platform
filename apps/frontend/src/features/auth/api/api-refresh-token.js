@@ -1,4 +1,4 @@
-import api from "../../../shared/services/axios";
+import api from "@/shared/services/axios";
 
 // Requests fresh auth cookies from backend refresh endpoint.
 export const refreshTokenApi = async () => {

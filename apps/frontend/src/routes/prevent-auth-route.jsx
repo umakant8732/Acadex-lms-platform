@@ -5,7 +5,7 @@ import {
   selectAuthUser,
   useAppSelector,
 } from "../app/store";
-import { getPostLoginRedirectPath } from "../shared/utils/auth-redirect";
+import { getPostLoginRedirectPath } from "@/shared/utils/auth-redirect";
 
 const PreventAuthRoute = ({ children }) => {
   const location = useLocation();

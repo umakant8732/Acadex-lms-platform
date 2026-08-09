@@ -1,6 +1,6 @@
 import React from "react";
 import { FiBell } from "react-icons/fi";
-import { showInfo } from "../../../../shared/utils/toast";
+import { showInfo } from "@/shared/utils/toast";
 
 const NotificationButton = () => {
   return (

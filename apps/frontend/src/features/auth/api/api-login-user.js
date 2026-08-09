@@ -1,4 +1,4 @@
-import api from "../../../shared/services/axios";
+import api from "@/shared/services/axios";
 
 // Sends login form data and returns authenticated user response.
 export const loginUserApi = async (payload) => {

@@ -5,9 +5,9 @@ import { useLoginUser } from "../queries/use-login-user";
 import { saveVerificationEmail } from "../services/auth-storage";
 import { setUser, useAppDispatch } from "../../../app/store";
 import { loginSchema } from "../validations/login-schema";
-import { getPostLoginRedirectPath } from "../../../shared/utils/auth-redirect";
-import { showError, showSuccess } from "../../../shared/utils/toast";
-import { getZodErrors } from "../../../shared/utils/zod";
+import { getPostLoginRedirectPath } from "@/shared/utils/auth-redirect";
+import { showError, showSuccess } from "@/shared/utils/toast";
+import { getZodErrors } from "@/shared/utils/zod";
 
 const initialLoginValues = {
   email: "",

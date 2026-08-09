@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
-import { getCourseDiscount } from "../../../../../shared/utils/course/calculate-course-pricing";
-import { formatCoursePrice } from "../../../../../shared/utils/course/format-course-price";
+import { getCourseDiscount } from "@/shared/utils/course/calculate-course-pricing";
+import { formatCoursePrice } from "@/shared/utils/course/format-course-price";
 
 const CourseThumbnailPlaceholder = ({ title, category }) => {
   const getInitials = (str) => {

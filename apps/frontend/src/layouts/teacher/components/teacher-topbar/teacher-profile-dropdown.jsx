@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 
 import { useAuthLogout } from "../../../../features/auth/hooks/use-auth-logout";
-import DropdownPanel from "../../../../shared/ui/app-shell/dropdown-panel";
-import { showInfo } from "../../../../shared/utils/toast";
+import DropdownPanel from "@/shared/ui/app-shell/dropdown-panel";
+import { showInfo } from "@/shared/utils/toast";
 
 const menuItemClasses = `
   block

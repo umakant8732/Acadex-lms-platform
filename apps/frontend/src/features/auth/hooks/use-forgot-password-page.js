@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { forgotPasswordSchema } from "../validations/forgot-password-schema";
 import { useForgotPassword } from "../queries/use-forgot-reset-password";
 import { saveVerificationEmail } from "../services/auth-storage";
-import { showError, showSuccess } from "../../../shared/utils/toast";
-import { getZodErrors } from "../../../shared/utils/zod";
+import { showError, showSuccess } from "@/shared/utils/toast";
+import { getZodErrors } from "@/shared/utils/zod";
 
 // Keeps forgot-password form state and local validation.
 export const useForgotPasswordPage = () => {

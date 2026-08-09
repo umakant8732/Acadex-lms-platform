@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useLogoutUser } from "../queries/use-logout-user";
 import { clearUser, useAppDispatch } from "../../../app/store";
-import { showError, showSuccess } from "../../../shared/utils/toast";
+import { showError, showSuccess } from "@/shared/utils/toast";
 
 // Runs logout mutation and clears auth state after success.
 export const useAuthLogout = () => {

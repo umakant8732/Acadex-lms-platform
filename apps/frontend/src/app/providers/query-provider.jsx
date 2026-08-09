@@ -1,6 +1,6 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 
-import { queryClient } from "../../shared/services/query-client";
+import { queryClient } from "@/shared/services/query-client";
 
 const QueryProvider = ({ children }) => {
   return (

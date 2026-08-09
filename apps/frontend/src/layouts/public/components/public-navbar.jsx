@@ -2,8 +2,8 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
-import AppLogo from "../../../shared/ui/app-shell/app-logo";
-import TopbarShell from "../../../shared/ui/app-shell/topbar-shell";
+import AppLogo from "@/shared/ui/app-shell/app-logo";
+import TopbarShell from "@/shared/ui/app-shell/topbar-shell";
 
 const PublicNavbar = () => {
   return (

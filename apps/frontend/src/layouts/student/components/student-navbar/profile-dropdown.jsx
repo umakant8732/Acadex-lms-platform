@@ -3,7 +3,7 @@ import { FiUser } from "react-icons/fi";
 import { Link } from "react-router-dom";
 
 import { useAuthLogout } from "../../../../features/auth/hooks/use-auth-logout";
-import DropdownPanel from "../../../../shared/ui/app-shell/dropdown-panel";
+import DropdownPanel from "@/shared/ui/app-shell/dropdown-panel";
 
 const menuItemClasses = `
   block

@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 
-import ShellContainer from "../../shared/ui/app-shell/shell-container.jsx";
+import ShellContainer from "@/shared/ui/app-shell/shell-container.jsx";
 import StudentFooter from "./components/student-footer.jsx";
 import StudentNavbar from "./components/student-navbar.jsx";
 

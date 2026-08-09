@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 
 import { useGetCurrentUser } from "../../features/auth/queries/use-get-current-user";
 import { useRefreshToken } from "../../features/auth/queries/use-refresh-token";
-import PageLoader from "../../shared/ui/feedback/page-loader";
+import PageLoader from "@/shared/ui/feedback/page-loader";
 import { clearUser, setUser, useAppDispatch } from "../store";
 
 const AuthProvider = ({ children }) => {

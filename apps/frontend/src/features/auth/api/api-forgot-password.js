@@ -1,4 +1,4 @@
-import apiClient from "../../../shared/services/axios";
+import apiClient from "@/shared/services/axios";
 
 // Calls backend to start forgot-password OTP flow
 export const forgotPasswordApi = async (payload) => {

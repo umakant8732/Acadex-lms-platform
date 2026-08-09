@@ -7,8 +7,8 @@ import {
   getVerificationEmail,
 } from "../services/auth-storage";
 import { resetPasswordSchema } from "../validations/reset-password-schema";
-import { showError, showSuccess } from "../../../shared/utils/toast";
-import { getZodErrors } from "../../../shared/utils/zod";
+import { showError, showSuccess } from "@/shared/utils/toast";
+import { getZodErrors } from "@/shared/utils/zod";
 
 const initialFormValues = {
   otp: "",

@@ -7,8 +7,8 @@ import {
   saveVerificationOtpExpiry,
 } from "../services/auth-storage";
 import { registerSchema } from "../validations/register-schema";
-import { showError, showSuccess } from "../../../shared/utils/toast";
-import { getZodErrors } from "../../../shared/utils/zod";
+import { showError, showSuccess } from "@/shared/utils/toast";
+import { getZodErrors } from "@/shared/utils/zod";
 
 const initialRegisterValues = {
   fullName: "",

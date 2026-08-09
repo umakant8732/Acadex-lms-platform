@@ -5,7 +5,7 @@ import {
   selectAuthUser,
   useAppSelector,
 } from "../app/store";
-import PageLoader from "../shared/ui/feedback/page-loader";
+import PageLoader from "@/shared/ui/feedback/page-loader";
 
 const ProtectedRoute = ({ children }) => {
   const user = useAppSelector(selectAuthUser);

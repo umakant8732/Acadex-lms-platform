@@ -1,10 +1,10 @@
 import { motion } from "framer-motion";
 
 import CourseCard from "./course-card";
-import PageLoader from "../../../../../shared/ui/feedback/page-loader.jsx";
-import SectionQueryError from "../../../../../shared/ui/feedback/section-query-error";
-import { usePublishedCourseCatalog } from "../../../../../features/course/catalog/hooks/use-published-course-catalog";
-import { getApiErrorMessage } from "../../../../../shared/utils/get-api-error-message";
+import PageLoader from "@/shared/ui/feedback/page-loader.jsx";
+import SectionQueryError from "@/shared/ui/feedback/section-query-error";
+import { usePublishedCourseCatalog } from "../../../../../features/common/course-catalog/hooks/use-published-course-catalog";
+import { getApiErrorMessage } from "@/shared/utils/get-api-error-message";
 
 const CoursesSection = () => {
   const { courses, isLoading, isError, error, isSuccess, refetchCourses } =

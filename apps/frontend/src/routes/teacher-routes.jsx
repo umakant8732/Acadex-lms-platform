@@ -1,13 +1,13 @@
 import TeacherLayout from "../layouts/teacher/teacher-layout.jsx";
 import ProtectedRoute from "./protected-route";
 import RoleRoute from "./role-route";
-import DashboardPage from "../layouts/teacher/pages/dashboard-page/dashboard-page.jsx";
-import CreateCoursePage from "../features/course/teacher-manage/pages/create-course-page/create-course-page.jsx";
-import ManageCoursesPage from "../features/course/teacher-manage/pages/manage-courses-page/manage-course-page.jsx";
-import UpdateCoursePage from "../features/course/teacher-manage/pages/update-course-page/update-course-page.jsx";
-import ViewCoursePage from "../features/course/teacher-manage/pages/view-course-page/view-course-page.jsx";
-import ManageLecturesPage from "../features/lecture/teacher-manage/pages/manage-lectures-page/manage-lectures-page.jsx";
-import CourseCurriculumPage from "../features/lecture/teacher-manage/pages/course-curriculum-page/course-curriculum-page.jsx";
+import DashboardPage from "../features/teacher/dashboard/pages/dashboard-page.jsx";
+import CreateCoursePage from "../features/teacher/courses/manage/pages/create-course-page/create-course-page.jsx";
+import ManageCoursesPage from "../features/teacher/courses/manage/pages/manage-courses-page/manage-course-page.jsx";
+import UpdateCoursePage from "../features/teacher/courses/manage/pages/update-course-page/update-course-page.jsx";
+import ViewCoursePage from "../features/teacher/courses/manage/pages/view-course-page/view-course-page.jsx";
+import ManageLecturesPage from "../features/teacher/lectures/manage/pages/manage-lectures-page/manage-lectures-page.jsx";
+import CourseCurriculumPage from "../features/teacher/lectures/manage/pages/course-curriculum-page/course-curriculum-page.jsx";
 
 const teacherRoutes = {
   path: "/teacher",

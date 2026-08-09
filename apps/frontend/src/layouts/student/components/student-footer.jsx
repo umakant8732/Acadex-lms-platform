@@ -1,1 +1,1 @@
-export { default } from "../../../shared/ui/app-shell/site-footer";
+export { default } from "@/shared/ui/app-shell/site-footer";

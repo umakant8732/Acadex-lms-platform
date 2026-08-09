@@ -1,12 +1,12 @@
 import PublicLayout from "../layouts/public/public-layout.jsx";
 import HomePage from "../layouts/public/pages/home-page/home-page";
-import CoursePreviewPage from "../features/course/preview/pages/course-preview-page/course-preview-page";
+import CoursePreviewPage from "../features/common/course-preview/pages/course-preview-page/course-preview-page";
 
 // Legal & Compliance Pages
-import TermsOfServicePage from "../features/legal/pages/terms-of-service-page";
-import PrivacyPolicyPage from "../features/legal/pages/privacy-policy-page";
-import RefundPolicyPage from "../features/legal/pages/refund-policy-page";
-import ContactUsPage from "../features/legal/pages/contact-us-page";
+import TermsOfServicePage from "../features/common/legal/pages/terms-of-service-page";
+import PrivacyPolicyPage from "../features/common/legal/pages/privacy-policy-page";
+import RefundPolicyPage from "../features/common/legal/pages/refund-policy-page";
+import ContactUsPage from "../features/common/legal/pages/contact-us-page";
 
 const publicRoutes = {
   path: "/",

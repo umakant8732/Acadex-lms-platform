@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { HiOutlineXMark } from "react-icons/hi2";
-import { showInfo } from "../../../shared/utils/toast";
+import { showInfo } from "@/shared/utils/toast";
 
 import {
   HiOutlineBookOpen,
@@ -12,7 +12,7 @@ import {
   HiOutlineUsers,
 } from "react-icons/hi2";
 
-import AppLogo from "../../../shared/ui/app-shell/app-logo";
+import AppLogo from "@/shared/ui/app-shell/app-logo";
 
 const menus = [
   {

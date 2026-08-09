@@ -1,4 +1,4 @@
-import api from "../../../shared/services/axios";
+import api from "@/shared/services/axios";
 
 // Sends otp verification payload and returns verify response.
 export const verifyEmailApi = async (payload) => {
