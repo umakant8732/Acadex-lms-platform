@@ -4,12 +4,16 @@ secreat-credentials/
 secret-credentials/
 
 # Backend generated media and keys
+backend/logs/
+backend/temp/
+backend/uploads/
+backend/secure/
+
+# Legacy path (if old folder still exists on disk)
 apps/backend/logs/
 apps/backend/temp/
 apps/backend/uploads/
-apps/backend/secure/*.pem
-apps/backend/secure/*.key
-apps/backend/secure/*.crt
+apps/backend/secure/
 
 # Node.js dependencies and build output
 node_modules/
@@ -49,6 +53,8 @@ PROJECT_SECRET_*.txt
 PROD_ENV_BACKEND.txt
 PROD_ENV_BACKEND.TXT
 PROD_ENV_*.txt
+PROD_ENV_SECREATS.txt
+acadex-aws-setup-log.txt
 
 # Local SSH and private key files
 *.pem
