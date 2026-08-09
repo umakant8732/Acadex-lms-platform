@@ -1,0 +1,34 @@
+import { createServer } from 'node:http'
+
+import app from './bootstrap/app.js'
+import { env } from '../config/env.js'
+import { connectDB } from '../config/database.js'
+import { connectRedis } from '../config/redis.js'
+import { setupSocketServer } from '../config/socket-server.js'
+import { startLectureStatusSocketSubscriber } from '../modules/lecture/sockets/lecture-status-pubsub.js'
+import { logger } from '../shared/utils/logger.js'
+
+const startServer = async () => {
+  try {
+    await connectDB()
+    await connectRedis()
+
+    const httpServer = createServer(app)
+
+    // Attach Socket.IO to same HTTP server.
+    setupSocketServer(httpServer)
+
+    // Listen to worker status events and fan them out to connected browsers.
+    await startLectureStatusSocketSubscriber()
+
+    httpServer.listen(env.PORT, () => {
+      logger.info(`Server running on port ${env.PORT}`)
+    })
+  } catch (error) {
+    logger.error(`Server Startup Error: ${error.message}`)
+
+    process.exit(1)
+  }
+}
+
+startServer()

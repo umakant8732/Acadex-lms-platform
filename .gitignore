@@ -4,12 +4,12 @@ secreat-credentials/
 secret-credentials/
 
 # Backend generated media and keys
-Backend/logs/
-Backend/temp/
-Backend/uploads/
-Backend/secure/*.pem
-Backend/secure/*.key
-Backend/secure/*.crt
+apps/backend/logs/
+apps/backend/temp/
+apps/backend/uploads/
+apps/backend/secure/*.pem
+apps/backend/secure/*.key
+apps/backend/secure/*.crt
 
 # Node.js dependencies and build output
 node_modules/
