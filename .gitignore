@@ -54,7 +54,7 @@ PROD_ENV_BACKEND.txt
 PROD_ENV_BACKEND.TXT
 PROD_ENV_*.txt
 PROD_ENV_*.md
-PROD_ENV_SECREATS.txt
+PROD_ENV_SECREATS.md
 acadex-aws-setup-log.txt
 
 # Local SSH and private key files
