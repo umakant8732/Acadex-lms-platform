@@ -130,6 +130,18 @@ export const useLectureCurriculumPage = () => {
       return;
     }
 
+    const allowedVideoMimeTypes = [
+      "video/mp4",
+      "video/webm",
+      "video/quicktime",
+    ];
+    if (!allowedVideoMimeTypes.includes(file.type)) {
+      showError("Only MP4, WebM, and MOV videos are allowed.");
+      event.target.value = "";
+      setSelectedUploadTarget(null);
+      return;
+    }
+
     void handleUploadLesson({
       section: selectedUploadTarget.section,
       lesson: selectedUploadTarget.lesson,

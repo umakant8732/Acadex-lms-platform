@@ -8,16 +8,25 @@ const errorMiddleware = (
   res,
   next
 ) => {
-  let statusCode = err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR
-
-  let message = err.message || 'Internal Server Error'
+  const isValidationError = err?.name === 'ZodError' || Array.isArray(err?.issues)
+  const validationMessages = isValidationError
+    ? err.issues
+        .map(issue => issue.message)
+        .filter(Boolean)
+    : []
+  const statusCode = err.statusCode || (
+    isValidationError ? StatusCodes.BAD_REQUEST : StatusCodes.INTERNAL_SERVER_ERROR
+  )
+  const message = isValidationError
+    ? 'Please correct the highlighted input and try again'
+    : err.message || 'Internal Server Error'
 
   logger.error(`${req.method} ${req.originalUrl} - ${message}`)
 
   res.status(statusCode).json({
     success: false,
     message,
-    errors: err.errors || []
+    errors: validationMessages.length > 0 ? validationMessages : err.errors || []
   })
 }
 

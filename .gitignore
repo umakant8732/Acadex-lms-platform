@@ -53,6 +53,7 @@ PROJECT_SECRET_*.txt
 PROD_ENV_BACKEND.txt
 PROD_ENV_BACKEND.TXT
 PROD_ENV_*.txt
+PROD_ENV_*.md
 PROD_ENV_SECREATS.txt
 acadex-aws-setup-log.txt
 

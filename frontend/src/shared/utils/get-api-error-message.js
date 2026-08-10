@@ -2,15 +2,52 @@ const isErrorResponseShape = (value) => {
   return typeof value === "object" && value !== null;
 };
 
+const getReadableErrors = (errors) => {
+  if (!Array.isArray(errors)) {
+    return "";
+  }
+
+  return errors
+    .map((error) =>
+      typeof error === "string" ? error : error?.message || "",
+    )
+    .filter(Boolean)
+    .join(", ");
+};
+
+const getReadableMessage = (message) => {
+  if (typeof message !== "string") {
+    return "";
+  }
+
+  // Older API responses can contain a Zod issue array serialized as a string.
+  if (message.startsWith("[")) {
+    try {
+      return getReadableErrors(JSON.parse(message));
+    } catch {
+      // Use the original message when it is not JSON.
+    }
+  }
+
+  return message;
+};
+
 // Picks readable message from api/browser errors.
 // This keeps page hooks smaller and toast text clean.
 export const getApiErrorMessage = (error, fallbackMessage) => {
   if (isErrorResponseShape(error)) {
-    const apiMessage = error.response?.data?.message;
+    const responseData = error.response?.data;
+    const validationMessage = getReadableErrors(responseData?.errors);
+
+    if (validationMessage) {
+      return validationMessage;
+    }
+
+    const apiMessage = responseData?.message;
 
     if (apiMessage) {
       if (typeof apiMessage === "string") {
-        return apiMessage;
+        return getReadableMessage(apiMessage) || fallbackMessage;
       }
       if (Array.isArray(apiMessage)) {
         // Extract validation messages from Zod / Express validator array

@@ -4,7 +4,7 @@ const mongoIdSchema = z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid id')
 
 const allowedVideoMimeTypes = ['video/mp4', 'video/webm', 'video/quicktime']
 
-const MAX_VIDEO_UPLOAD_SIZE = 30 * 1024 * 1024 // 100 MB
+const MAX_VIDEO_UPLOAD_SIZE = 30 * 1024 * 1024 // 30 MB
 
 //use to validate required parameters for presigned url generation
 export const createPresignedUploadUrlSchema = z.object({
