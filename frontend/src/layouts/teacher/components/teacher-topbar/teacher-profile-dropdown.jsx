@@ -2,7 +2,6 @@ import React, { useState } from "react";
 
 import { useAuthLogout } from "../../../../features/auth/hooks/use-auth-logout";
 import DropdownPanel from "@/shared/ui/app-shell/dropdown-panel";
-import { showInfo } from "@/shared/utils/toast";
 
 const menuItemClasses = `
   block
@@ -32,26 +31,6 @@ const TeacherProfileDropdown = () => {
 
       {open && (
         <DropdownPanel>
-          <button
-            onClick={() => {
-              showInfo("Coming Soon: Profile module is under development!");
-              setOpen(false);
-            }}
-            className={menuItemClasses}
-          >
-            Profile
-          </button>
-
-          <button
-            onClick={() => {
-              showInfo("Coming Soon: Settings module is under development!");
-              setOpen(false);
-            }}
-            className={menuItemClasses}
-          >
-            Settings
-          </button>
-
           <button
             onClick={handleLogout}
             disabled={isPending}

@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { FiHeart } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 
 import {
@@ -110,19 +111,37 @@ const StudentCourseCard = ({ course }) => {
         </p>
 
 
-        {!access.isPurchased && (
-          <div className="mt-6 flex items-end gap-3">
-            <span className="text-3xl font-semibold text-black">
-              {formatCoursePrice(course.price)}
-            </span>
-
-            {course.originalPrice > course.price && (
-              <span className="pb-1 text-black/30 line-through">
-                {formatCoursePrice(course.originalPrice)}
+        <div className="mt-6 flex items-end justify-between gap-4">
+          {!access.isPurchased ? (
+            <div className="flex items-end gap-3">
+              <span className="text-3xl font-semibold text-black">
+                {formatCoursePrice(course.price)}
               </span>
-            )}
-          </div>
-        )}
+
+              {course.originalPrice > course.price && (
+                <span className="pb-1 text-black/30 line-through">
+                  {formatCoursePrice(course.originalPrice)}
+                </span>
+              )}
+            </div>
+          ) : (
+            <span />
+          )}
+
+          <button
+            type="button"
+            aria-label="Add to wishlist"
+            onClick={(event) => event.stopPropagation()}
+            className="group flex shrink-0 items-center gap-2 text-black/60 transition hover:text-black"
+          >
+            <span className="max-w-0 overflow-hidden whitespace-nowrap text-xs font-medium opacity-0 transition-all duration-200 group-hover:max-w-[7rem] group-hover:opacity-100">
+              Add to wishlist
+            </span>
+            <span className="flex h-9 w-9 items-center justify-center border border-black/10 text-lg transition group-hover:border-black group-hover:bg-black group-hover:text-white">
+              <FiHeart />
+            </span>
+          </button>
+        </div>
 
 
         <div className="mt-auto pt-7">

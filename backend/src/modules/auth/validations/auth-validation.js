@@ -30,10 +30,6 @@ export const resendOTPSchema = z.object({
   email: z.string().trim().toLowerCase().email('Invalid email')
 })
 
-export const refreshTokenSchema = z.object({
-  refreshToken: z.string().trim().min(1, 'Refresh token is required')
-})
-
 export const forgotPasswordSchema = z.object({
   email: z.string().trim().toLowerCase().email('Invalid email')
 })

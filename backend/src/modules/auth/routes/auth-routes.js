@@ -19,7 +19,6 @@ import { loginUser } from '../controllers/login-user-controller.js'
 import { getCurrentUser } from '../controllers/get-current-user-controller.js'
 import { verifyEmail } from '../controllers/verify-email-controller.js'
 import { resendOTP } from '../controllers/resend-otp-controller.js'
-import { refreshToken } from '../controllers/refresh-token-controller.js'
 import { logoutUser } from '../controllers/logout-user-controller.js'
 import { forgotPassword } from '../controllers/forgot-password-controller.js'
 import { resetPassword } from '../controllers/reset-password-controller.js'
@@ -38,8 +37,6 @@ router.post('/verify-email', authLimiter, validate(verifyEmailSchema), verifyEma
 router.post('/forgot-password', authLimiter, validate(forgotPasswordSchema), forgotPassword)
 
 router.post('/reset-password', authLimiter, validate(resetPasswordSchema), resetPassword)
-
-router.post('/refresh-token', authLimiter, refreshToken)
 
 router.post('/logout', authMiddleware, logoutUser)
 

@@ -33,10 +33,6 @@ const ProfileDropdown = () => {
 
       {open && (
         <DropdownPanel>
-          <Link to="/student" className={menuItemClasses}>
-            My Courses
-          </Link>
-
           <Link to="/student/invoices" className={menuItemClasses}>
             Invoices
           </Link>
