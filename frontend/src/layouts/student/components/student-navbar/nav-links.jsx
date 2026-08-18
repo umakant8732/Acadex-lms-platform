@@ -11,7 +11,8 @@ const navItems = [
   },
   {
     label: "My Learning",
-    disabled: true,
+    to: "/student/my-learning",
+    disabled: false,
   },
   {
     label: "Wishlist",

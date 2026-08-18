@@ -4,6 +4,7 @@ import StudentCourseOverviewPage from "../features/student/courses/overview/page
 import StudentWatchPage from "../features/student/lectures/watch/pages/student-watch-page/student-watch-page";
 import StudentHomePage from "../features/student/dashboard/pages/student-home-page";
 import StudentInvoicesPage from "../features/student/courses/checkout/pages/student-invoices-page";
+import StudentMyLearningPage from "../features/student/courses/my-learning/pages/student-my-learning-page";
 import ProtectedRoute from "./protected-route";
 import RoleRoute from "./role-route";
 
@@ -36,6 +37,10 @@ const studentRoutes = {
     {
       path: "checkout/:courseId",
       element: <CoursePreviewPage />,
+    },
+    {
+      path: "my-learning",
+      element: <StudentMyLearningPage />,
     },
     {
       path: "invoices",
