@@ -1,4 +1,3 @@
-import React from "react";
 import { NavLink } from "react-router-dom";
 import { showInfo } from "@/shared/utils/toast";
 
@@ -16,7 +15,8 @@ const navItems = [
   },
   {
     label: "Wishlist",
-    disabled: true,
+    to: "/student/wishlist",
+    disabled: false,
   },
 ];
 

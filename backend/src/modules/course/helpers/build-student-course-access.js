@@ -1,10 +1,11 @@
 //builds one consistent access object for student course UI.
 
-export const buildStudentCourseAccess = ({ enrollment }) => {
+export const buildStudentCourseAccess = ({ enrollment, isWishlisted }) => {
     const isPurchased = Boolean(enrollment)
 
     return {
         isPurchased,
+        isWishlisted: Boolean(isWishlisted),
         progressPercent: 0,
         expiresAt: null,
 

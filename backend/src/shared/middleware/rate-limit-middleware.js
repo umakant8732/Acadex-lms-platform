@@ -6,7 +6,7 @@ export const globalLimiter = rateLimit({
 
   windowMs: 15 * 60 * 1000,
 
-  max: 100,
+  max: 10000,
 
   message: {
     success: false,

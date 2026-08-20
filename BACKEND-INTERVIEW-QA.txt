@@ -1,0 +1,435 @@
+================================================================================
+  ACADEX LMS — 1 HR MERN STACK INTERVIEW PREP (55 Questions)
+  Focus: Modules, MongoDB, Node.js, Redis, Deployment (Nginx, EC2, PM2)
+  Language: Hindi + simple technical terms
+================================================================================
+
+================================================================================
+PART 1: PROJECT & MODULES (10 Questions)
+================================================================================
+
+Q1. Acadex LMS project kya hai — short intro do interview mein?
+A:
+1. Yeh ek online Learning Management System hai jahan teachers courses create karte hain aur students purchase karke video lectures dekhte hain.
+2. MERN stack use kiya: MongoDB (database), Express/Node (backend API), React (frontend), Node worker (background jobs).
+3. Payment Razorpay se, videos AWS S3 + CloudFront se stream hote hain, production pe EC2 + Nginx pe deploy hai.
+
+Q2. Backend mein kaun-kaun se modules hain?
+A:
+1. Auth — register, login, OTP verify, forgot/reset password, JWT cookies.
+2. Course — teacher CRUD, publish/unpublish, student catalog, thumbnail upload.
+3. Lecture — video upload S3 pe, transcode HLS, playback access, Socket status.
+4. Payment — Razorpay order, verify, webhook.
+5. Enrollment — payment ke baad student ko course access (alag routes nahi, payment se create hota hai).
+
+Q3. Har module ki MongoDB collection ka naam kya hai?
+A:
+1. Auth → users collection (User model).
+2. Course → courses collection (syllabus embedded array ke saath).
+3. Lecture → lectures + videoassets (do collections — lecture mapping + video file metadata).
+4. Payment → paymentattempts collection.
+5. Enrollment → enrollments collection.
+
+Q4. Modules kaise manage kiye — folder structure?
+A:
+1. Har module: routes → controllers → services → repositories pattern follow kiya.
+2. routes sirf URL + middleware; controllers thin; services mein business logic; repositories mein DB queries.
+3. Shared cheezein alag: config/, shared/middleware/, app/server.js (API) aur app/worker.js (background jobs).
+
+Q5. API server aur worker alag kyun rakha?
+A:
+1. Video transcoding (FFmpeg) bahut CPU leta hai — agar same process mein ho to API slow ho jati hai.
+2. PM2 pe do process: acadex-backend (API + Socket) aur acadex-worker (email + video transcode jobs).
+3. Dono same Redis queue (BullMQ) share karte hain — API job daalti hai, worker process karti hai.
+
+Q6. Frontend backend se kaise baat karta hai?
+A:
+1. Axios se REST API call — base URL: /api/v1 (production pe https://domain/api/v1).
+2. withCredentials: true — cookies automatically bhejti hai (JWT auth).
+3. Socket.IO alag — lecture upload status real-time update ke liye.
+
+Q7. Teacher aur student flow alag kaise hai?
+A:
+1. User model mein role: student (default) ya teacher.
+2. roleMiddleware routes pe lagta hai — teacher routes sirf teacher, student routes sirf student.
+3. Teacher: course/lecture create. Student: browse, buy, watch.
+
+Q8. Syllabus kahan store hai — alag collection nahi?
+A:
+1. Course document ke andar embedded array hai: syllabus[] → sections[] → lessons[].
+2. Har section/lesson ka apna _id hota hai — lecture us _id ko reference karta hai (sectionId, lessonId).
+3. Alag collection nahi — ek course read mein poora curriculum mil jata hai.
+
+Q9. Payment success ke baad kya hota hai step-by-step?
+A:
+1. Student Razorpay se pay karta hai → verify-payment API signature check karti hai.
+2. PaymentAttempt status fulfilled hota hai → Enrollment document create (userId + courseId + paymentAttemptId).
+3. Ab student library mein course dikhega aur lectures play kar sakta hai (enrollment check pass).
+
+Q10. Project ki tech stack ek line mein?
+A:
+1. Backend: Node.js, Express 5, Mongoose, Redis, BullMQ, Socket.IO, Zod, Razorpay, AWS S3/CloudFront, FFmpeg.
+2. Database: MongoDB Atlas (production), local Mongo (development).
+3. Deploy: Ubuntu EC2, Nginx, PM2, Let's Encrypt SSL, GoDaddy DNS.
+
+================================================================================
+PART 2: MONGODB BASICS (10 Questions)
+================================================================================
+
+Q11. MongoDB kya hai aur SQL se main difference?
+A:
+1. MongoDB NoSQL document database hai — data JSON jaisi documents (BSON) mein store hota hai.
+2. SQL mein tables + rows + fixed columns; MongoDB mein collections + flexible documents (har doc alag fields ho sakte hain).
+3. LMS mein courses, users alag collections; course ke andar syllabus embed kar sakte ho — SQL mein multiple tables join chahiye hota.
+
+Q12. Collection, Document, _id kya hai?
+A:
+1. Collection = table jaisa (e.g. users, courses). Document = ek row/record (ek user ka data).
+2. Har document ka unique _id hota hai (ObjectId) — automatically generate hota hai.
+3. Example: users collection mein ek doc: { _id, fullName, email, role, password, ... }.
+
+Q13. Mongoose kya karta hai project mein?
+A:
+1. MongoDB ka ODM (Object Data Modeling) — schema define, validation, hooks (jaise password hash before save).
+2. Models: User, Course, Lecture, VideoAsset, PaymentAttempt, Enrollment.
+3. mongoose.connect(MONGO_URI) se database connect; models se queries easy: User.findOne({ email }).
+
+Q14. find() vs findOne() vs findById()?
+A:
+1. find() — multiple documents array return (e.g. saare published courses).
+2. findOne() — sirf pehla match (e.g. email se login user).
+3. findById(id) — _id se direct ek document (shortcut for findOne({ _id: id })).
+
+Q15. ObjectId reference kya hai — example LMS mein?
+A:
+1. Ek collection ke document mein doosri collection ka _id store hota hai — foreign key jaisa.
+2. Enrollment: userId → users._id, courseId → courses._id, paymentAttemptId → paymentattempts._id.
+3. Lecture: courseId → courses._id, videoAssetId → videoassets._id.
+
+Q16. Embedded document kya hai — syllabus example?
+A:
+1. Document ke andar nested object/array — alag collection nahi.
+2. Course.syllabus = [{ sectionTitle, order, lessons: [{ title, order }] }].
+3. Benefit: ek query mein course + syllabus; drawback: bada document ho sakta hai, partial update thoda complex.
+
+Q17. Soft delete kya hai project mein?
+A:
+1. Document DB se delete nahi — sirf flag: delete: true (courses, lectures mein).
+2. Queries mein filter: { delete: false } — user ko deleted data nahi dikhta.
+3. History recover/debug possible; hard delete sirf media purge job mein S3 files ke saath.
+
+Q18. Index kya hai aur LMS mein kahan use hai?
+A:
+1. Index = database ki speed ke liye shortcut (jaise book ka index) — bina index poori collection scan.
+2. Enrollment: unique { userId, courseId } — duplicate enrollment block. Payment: unique receipt, providerOrderId.
+3. Lecture: unique { courseId, lessonId } — ek lesson pe ek hi lecture record.
+
+Q19. Basic query — published courses lao?
+A:
+db.courses.find({ isPublished: true, delete: false })
+
+Matlab: isPublished true AND delete false wale saare course documents return.
+
+Q20. Basic query — kisi student ke active enrollments?
+A:
+db.enrollments.find({ userId: ObjectId("STUDENT_ID"), status: "active" })
+
+Matlab: us student ke saare active course access records.
+
+================================================================================
+PART 3: MONGODB AGGREGATION (6 Questions)
+================================================================================
+
+Q21. Aggregation kya hai — simple Hindi mein?
+A:
+1. Aggregation = MongoDB ka advanced query pipeline — data filter, group, join, calculate ek sequence mein.
+2. SQL jaisa GROUP BY, JOIN, COUNT combine karne ke liye — find() se zyada powerful.
+3. Stages pipe mein lagte hain: data ek stage se doosri stage mein flow hota hai.
+
+Q22. $match, $group, $lookup — teen main stages?
+A:
+1. $match — filter (jaise find) — pehle stage mein documents kam karo.
+2. $group — group by field + count/sum/avg (e.g. category wise kitne courses).
+3. $lookup — do collection join (jaise SQL JOIN) — enrollments + courses ek saath.
+
+Q23. Example: Category wise kitne courses hain?
+A:
+db.courses.aggregate([
+  { $match: { delete: false } },
+  { $group: { _id: "$category", total: { $sum: 1 } } },
+  { $sort: { total: -1 } }
+])
+
+Step 1: deleted courses hatao. Step 2: category ke hisaab se count. Step 3: sabse zyada courses wali category upar.
+
+Q24. Example: Har course pe kitne students enrolled — JOIN ke saath?
+A:
+db.enrollments.aggregate([
+  { $match: { status: "active" } },
+  { $group: { _id: "$courseId", studentCount: { $sum: 1 } } },
+  { $lookup: { from: "courses", localField: "_id", foreignField: "_id", as: "course" } },
+  { $unwind: "$course" },
+  { $project: { courseTitle: "$course.title", studentCount: 1 } }
+])
+
+Enrollment count karo → courses collection se title join karo → readable result.
+
+Q25. Example: Total revenue (fulfilled payments ka sum)?
+A:
+db.paymentattempts.aggregate([
+  { $match: { status: "fulfilled" } },
+  { $group: { _id: null, totalPaise: { $sum: "$amount" } } }
+])
+
+Sirf successful payments → amount (paise mein) sabka sum. Rupees ke liye divide by 100.
+
+Q26. $unwind kya karta hai?
+A:
+1. Array field ko alag-alag documents mein tod deta hai — flatten.
+2. $lookup ke baad "course" array mein ek item hota hai — $unwind se direct object milta hai.
+3. Example: agar syllabus unwind karo to har lesson alag row ban jayega count karne ke liye.
+
+================================================================================
+PART 4: NODE.JS & EXPRESS (10 Questions)
+================================================================================
+
+Q27. Node.js kya hai?
+A:
+1. JavaScript runtime jo server pe code chalata hai (browser ke bahar) — Chrome ka V8 engine use karta hai.
+2. Non-blocking I/O — ek request wait karte waqt doosri handle kar sakta hai; APIs ke liye fast.
+3. LMS backend poora Node.js + Express pe hai.
+
+Q28. Express kya hai?
+A:
+1. Node.js ka web framework — HTTP routes, middleware, request/response handle karta hai.
+2. app.use() middleware chain; app.get/post routes define.
+3. Hamara API prefix: /api/v1 — routes module-wise mount.
+
+Q29. Middleware kya hai — 2-3 examples?
+A:
+1. Request aur response ke beech functions — har request pe sequence mein chalti hain.
+2. authMiddleware — cookie se JWT check, req.user set. validate-middleware — Zod se body validate.
+3. cors, helmet, cookie-parser, rate-limiter — sab middleware hain app.js mein.
+
+Q30. async/await kyun use karte ho?
+A:
+1. Database/API calls async hain — wait karna padta hai bina thread block kiye.
+2. async function + await User.findOne() — clean readable code.
+3. asyncHandler wrap karta hai controllers — error automatically error middleware ko jata hai.
+
+Q31. JWT auth cookies mein kyun — localStorage kyun nahi?
+A:
+1. httpOnly cookie JavaScript se read nahi hoti — XSS attack se token chori mushkil.
+2. Browser automatically cookie bhejta hai withCredentials ke saath.
+3. accessToken (short life) + refreshToken (long life, DB mein stored) — secure session.
+
+Q32. CORS kya problem solve karta hai?
+A:
+1. Browser security — agar frontend aur API alag origin pe hon to by default block.
+2. Backend whitelist karta hai: CLIENT_URL, CLIENT_URLS + credentials: true.
+3. Production mein same domain (acadexlearning.xyz) Nginx se — / pe frontend, /api pe backend.
+
+Q33. .env file kya hai?
+A:
+1. Environment variables store — PORT, MONGO_URI, JWT secrets, Razorpay keys, AWS keys.
+2. Git mein commit NAHI — server pe alag .env production values ke saath.
+3. dotenv package load karta hai; Zod se startup pe validate — galat env pe app start nahi hoti.
+
+Q34. Error handling kaise?
+A:
+1. Services mein throw new ApiError(statusCode, message).
+2. error-middleware last mein — saari errors catch, JSON response { success: false, message }.
+3. Zod validation fail → 400 with field errors.
+
+Q35. BullMQ / Queue kya hai short mein?
+A:
+1. Background jobs — API turant response, heavy kaam baad mein worker karta hai.
+2. Redis pe queue: auth-email-queue (OTP, invoice mail), lecture-transcode-queue (video processing).
+3. Retry automatic — fail ho to 3 baar dubara try exponential backoff se.
+
+Q36. Zod validation kya hai?
+A:
+1. Schema-based validation library — register/login body check before service.
+2. email trim+lowercase, password min 8 max 20 — galat input pe 400 error.
+3. validate-middleware har protected route pe lagta hai.
+
+================================================================================
+PART 5: REDIS (6 Questions)
+================================================================================
+
+Q37. Redis kya hai aur project mein kahan use?
+A:
+1. In-memory key-value store — bahut fast read/write; data RAM mein.
+2. Hamare project mein 4 kaam: OTP store, course cache, BullMQ job queue, pub/sub (lecture status worker→API).
+3. Production pe EC2 pe local Redis: redis://127.0.0.1:6379
+
+Q38. Redis SET command — project mein kaise use?
+A:
+1. SET key value — value store karo. Hamare code mein: redisClient.set(key, value, { EX: seconds }).
+2. OTP: SET otp:user@gmail.com "482910" EX 300 — 5 minute baad auto delete.
+3. Cache: SET courses:published JSON.stringify(courses) EX 300 — published courses 5 min cache.
+
+Q39. Redis GET command — project mein kaise use?
+A:
+1. GET key — value read karo. Miss pe null return.
+2. OTP verify: GET otp:user@gmail.com → compare with user input.
+3. Cache read: GET courses:published → JSON.parse → agar null to DB se fetch karke SET karo.
+
+Q40. Redis DEL command — project mein kaise use?
+A:
+1. DEL key — key delete karo.
+2. OTP success ke baad: DEL otp:email — OTP dubara use nahi ho sakta.
+3. Cache invalidate: DEL courses:published — course update/publish pe purani cache hatao.
+
+Q41. Hamare project ki Redis keys list?
+A:
+1. otp:{email} — OTP value, TTL 300 sec (auth module).
+2. courses:published — saare published courses JSON, TTL 5 min (course cache).
+3. course:details:{courseId} — single course details JSON, TTL 5 min.
+4. BullMQ apni internal keys banata hai queue ke liye (prefix bull: etc.).
+
+Q42. Cache kyun use kiya courses ke liye?
+A:
+1. Published courses list har student browse karta hai — baar-baar MongoDB query slow.
+2. Pehli request DB → Redis SET; agle 5 min GET se fast response.
+3. Teacher course update/publish/delete pe DEL — fresh data next request pe.
+
+================================================================================
+PART 6: DEPLOYMENT — HEAVY FOCUS (23 Questions)
+================================================================================
+
+Q43. Production architecture ek diagram verbally batao?
+A:
+1. User browser → GoDaddy DNS → EC2 Public IP → Nginx (port 443 HTTPS).
+2. Nginx: / → React static files (HTML/JS/CSS), /api/ → Node backend (127.0.0.1:5000), /socket.io/ → same backend websocket.
+3. Backend → MongoDB Atlas (cloud DB), Redis (local EC2), S3/CloudFront (media), Razorpay (payments).
+
+Q44. EC2 instance details kya use ki?
+A:
+1. Region: ap-south-1 (Mumbai), Instance: t3.micro (free tier friendly), OS: Ubuntu.
+2. Public IP enabled — domain is IP pe point karta hai.
+3. Storage: default root volume sufficient for code + Redis + temp files.
+
+Q45. Security Group inbound rules kya set kiye?
+A:
+1. SSH Port 22 — apne IP se (My IP); setup ke time temporarily Anywhere bhi rakha tha.
+2. HTTP Port 80 — Source 0.0.0.0/0 (sabko) — Certbot + redirect HTTPS ke liye.
+3. HTTPS Port 443 — Source 0.0.0.0/0 — public website access.
+4. Port 5000 PUBLIC NAHI — backend sirf Nginx se internal 127.0.0.1:5000 pe.
+
+Q46. Port 5000 public kyun nahi rakha?
+A:
+1. Security — Node directly internet pe expose hone se attack surface badhta hai.
+2. Nginx reverse proxy ek layer deta hai — SSL, rate limit, static files ek jagah.
+3. Backend bind internal — sirf localhost/Nginx access kare.
+
+Q47. Nginx kya hai simple mein?
+A:
+1. Web server + reverse proxy — duniya se request pehle Nginx pe aati hai.
+2. Static files khud serve karta hai (React build); API requests backend ko forward.
+3. SSL certificate Nginx pe terminate — HTTPS user se Nginx tak.
+
+Q48. Nginx frontend kaise serve karta hai?
+A:
+1. root /var/www/acadex-frontend; — React npm run build ka output yahan copy.
+2. index index.html; — default file index.html.
+3. location / { try_files $uri $uri/ /index.html; } — React Router ke liye har URL pe index.html (refresh pe 404 nahi).
+
+Q49. Nginx API requests kaise backend ko bhejta hai?
+A:
+1. location /api/ { proxy_pass http://127.0.0.1:5000/api/; }
+2. Matlab: browser https://domain/api/v1/auth/login → Nginx receive → backend port 5000 pe forward.
+3. Headers set: Host, X-Real-IP, X-Forwarded-For, X-Forwarded-Proto — backend ko real client info mile.
+
+Q50. Nginx Socket.IO kaise handle karta hai?
+A:
+1. location /socket.io/ { proxy_pass http://127.0.0.1:5000/socket.io/; }
+2. WebSocket ke liye special headers: Upgrade: websocket, Connection: upgrade.
+3. Bina ye headers ke real-time lecture status updates kaam nahi karenge.
+
+Q51. PM2 kya hai aur kyun use kiya?
+A:
+1. Node.js process manager — app background mein chalti rahe terminal band hone pe bhi.
+2. Crash pe auto restart; server reboot pe auto start (pm2 save + pm2 startup).
+3. Do processes: acadex-backend (npm start) + acadex-worker (npm run start:worker).
+
+Q52. PM2 start commands kya hain?
+A:
+1. pm2 start npm --name acadex-backend -- start  → node src/app/server.js
+2. pm2 start npm --name acadex-worker -- run start:worker → node src/app/worker.js
+3. pm2 list (status), pm2 logs (errors dekho), pm2 restart acadex-backend (update ke baad).
+
+Q53. MongoDB Atlas EC2 pe local kyun nahi?
+A:
+1. Managed service — backup, monitoring, scaling AWS handle; EC2 pe Mongo install + maintain mushkil.
+2. t3.micro pe Mongo + app + worker — RAM kam pad sakta hai.
+3. Atlas IP whitelist: EC2 ka public IP add karna padta hai Network Access mein.
+
+Q54. Redis EC2 pe local kyun?
+A:
+1. OTP, cache, BullMQ queue — low latency chahiye, same machine pe fast.
+2. apt install redis-server; REDIS_URL=redis://127.0.0.1:6379
+3. Managed Redis (ElastiCache) baad mein scale pe — abhi cost save.
+
+Q55. SSL/HTTPS kaise setup kiya?
+A:
+1. Certbot + Let's Encrypt: sudo certbot --nginx -d acadexlearning.xyz -d www.acadexlearning.xyz
+2. Nginx config automatically update — port 80 se 443 redirect + certificate install.
+3. Auto renew cron — certificate 90 din mein expire; certbot renew handle karta hai.
+
+Q56. Domain DNS kaise point kiya?
+A:
+1. GoDaddy mein A record: @ → EC2 public IP (acadexlearning.xyz).
+2. A record: www → same IP (www.acadexlearning.xyz).
+3. DNS propagate hone ke baad domain browser mein EC2 pe jata hai.
+
+Q57. Frontend deploy steps short?
+A:
+1. Server pe: cd Frontend → .env.production set (VITE_API_URL=https://domain/api/v1).
+2. npm run build → dist folder banta hai.
+3. sudo cp -r dist/* /var/www/acadex-frontend/ → Nginx wahi se serve karta hai.
+
+Q58. Backend deploy / update steps short?
+A:
+1. ssh EC2 → cd Backend → git pull (latest code).
+2. npm install (agar new packages), .env check/update.
+3. pm2 restart acadex-backend acadex-worker → curl https://domain/api/v1/health verify.
+
+Q59. COOKIE_SECURE production mein kyun true?
+A:
+1. HTTPS pe hi secure cookies browser bhejta hai — HTTP pe login cookies set nahi hoti.
+2. Certbot SSL ke baad COOKIE_SECURE=true set kiya.
+3. COOKIE_SAME_SITE=lax — same domain pe frontend+API safe default.
+
+Q60. trust proxy Express mein kyun?
+A:
+1. App Nginx ke peeche chalti hai — bina trust proxy req.ip galat aata hai.
+2. app.set('trust proxy', 1) production mein — X-Forwarded-For sahi client IP.
+3. Rate limiter aur logging ke liye important.
+
+================================================================================
+QUICK REVISION CHEAT SHEET (Interview se pehle 5 min)
+================================================================================
+
+Collections: users | courses | lectures | videoassets | paymentattempts | enrollments
+
+Redis Keys:  otp:{email}  |  courses:published  |  course:details:{id}
+Redis CMD:   SET key val EX 300  |  GET key  |  DEL key
+
+Ports:  443/80 public (Nginx)  |  5000 internal only  |  22 SSH (My IP)
+
+PM2:  acadex-backend + acadex-worker  |  pm2 restart after deploy
+
+Nginx:  / → static React  |  /api/ → proxy :5000  |  /socket.io/ → websocket proxy
+
+Aggregation:  $match (filter) → $group (count/sum) → $lookup (join) → $project (select fields)
+
+Health check: curl https://domain/api/v1/health
+
+Common issues: Atlas IP whitelist | S3 CORS domain | COOKIE_SECURE needs HTTPS
+
+2-min pitch: MERN LMS → modules → Razorpay + S3/CloudFront → EC2+Nginx+PM2 live deploy
+
+================================================================================
+END — 55 Questions | 1 HR MERN Interview | All the best!
+================================================================================

@@ -3,6 +3,7 @@ import CoursePreviewPage from "../features/common/course-preview/pages/course-pr
 import StudentCourseOverviewPage from "../features/student/courses/overview/pages/student-course-overview-page/student-course-overview-page";
 import StudentWatchPage from "../features/student/lectures/watch/pages/student-watch-page/student-watch-page";
 import StudentHomePage from "../features/student/dashboard/pages/student-home-page";
+import StudentWishlistPage from "../features/student/dashboard/pages/student-wishlist-page";
 import StudentInvoicesPage from "../features/student/courses/checkout/pages/student-invoices-page";
 import StudentMyLearningPage from "../features/student/courses/my-learning/pages/student-my-learning-page";
 import ProtectedRoute from "./protected-route";
@@ -41,6 +42,10 @@ const studentRoutes = {
     {
       path: "my-learning",
       element: <StudentMyLearningPage />,
+    },
+    {
+      path: "wishlist",
+      element: <StudentWishlistPage />,
     },
     {
       path: "invoices",

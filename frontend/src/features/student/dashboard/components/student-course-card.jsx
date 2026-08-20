@@ -6,9 +6,12 @@ import {
   getCourseDiscount,
 } from "@/shared/utils/course/calculate-course-pricing";
 import { formatCoursePrice } from "@/shared/utils/course/format-course-price";
+import { useToggleStudentWishlist } from "../queries/use-toggle-student-wishlist";
+import { showSuccess, showError } from "@/shared/utils/toast";
 
 const StudentCourseCard = ({ course }) => {
   const navigate = useNavigate();
+  const { mutate: toggleWishlist, isPending } = useToggleStudentWishlist();
   const courseDiscount = getCourseDiscount(course.price, course.originalPrice);
 
   const courseThumbnail = course.thumbnail?.trim();
@@ -52,6 +55,27 @@ const StudentCourseCard = ({ course }) => {
       event.preventDefault();
       navigate(courseOverviewPath);
     }
+  };
+
+  const handleWishlistToggle = (event) => {
+    event.stopPropagation();
+    if (isPending) return;
+    
+    toggleWishlist(course._id, {
+      onSuccess: (data) => {
+        if (data?.isWishlisted) {
+          showSuccess("Course added to wishlist");
+        } else {
+          showSuccess("Course removed from wishlist");
+        }
+      },
+      onError: (err) => {
+        showError(
+          err?.response?.data?.message || 
+          "Failed to update wishlist"
+        );
+      }
+    });
   };
 
   return (
@@ -128,19 +152,22 @@ const StudentCourseCard = ({ course }) => {
             <span />
           )}
 
-          <button
-            type="button"
-            aria-label="Add to wishlist"
-            onClick={(event) => event.stopPropagation()}
-            className="group flex shrink-0 items-center gap-2 text-black/60 transition hover:text-black"
-          >
-            <span className="max-w-0 overflow-hidden whitespace-nowrap text-xs font-medium opacity-0 transition-all duration-200 group-hover:max-w-[7rem] group-hover:opacity-100">
-              Add to wishlist
-            </span>
-            <span className="flex h-9 w-9 items-center justify-center border border-black/10 text-lg transition group-hover:border-black group-hover:bg-black group-hover:text-white">
-              <FiHeart />
-            </span>
-          </button>
+          {!access.isPurchased && (
+            <button
+              type="button"
+              disabled={isPending}
+              aria-label={access.isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+              onClick={handleWishlistToggle}
+              className="group flex shrink-0 items-center gap-2 text-black/60 transition hover:text-black disabled:opacity-50"
+            >
+              <span className="max-w-0 overflow-hidden whitespace-nowrap text-xs font-medium opacity-0 transition-all duration-200 group-hover:max-w-[10rem] group-hover:opacity-100">
+                {access.isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+              </span>
+              <span className="flex h-9 w-9 items-center justify-center border border-black/10 text-lg transition group-hover:border-black group-hover:bg-black group-hover:text-white">
+                <FiHeart className={access.isWishlisted ? "fill-current text-black group-hover:text-white" : ""} />
+              </span>
+            </button>
+          )}
         </div>
 
 
