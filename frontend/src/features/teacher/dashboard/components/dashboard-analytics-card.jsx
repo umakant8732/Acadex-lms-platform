@@ -4,6 +4,16 @@ import { useGetRevenueChart } from "../queries/use-get-revenue-chart";
 import { useGetCategorySplit } from "../queries/use-get-category-split";
 import { useState } from "react";
 
+const BAR_COLORS = [
+  "bg-blue-600",
+  "bg-purple-600",
+  "bg-emerald-600",
+  "bg-amber-600",
+  "bg-rose-600",
+  "bg-indigo-600",
+  "bg-teal-600",
+];
+
 const AnalyticsCard = () => {
   const [hoveredPoint, setHoveredPoint] = useState(null);
   const { data: revenueData, isLoading: isRevenueLoading } = useGetRevenueChart();
@@ -194,26 +204,30 @@ const AnalyticsCard = () => {
           </div>
         ) : (
           <div className="mt-8 space-y-5">
-            {categorySplitData.categorySplit.map((cat, idx) => (
-              <div key={cat.name} className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium text-black">{cat.name}</span>
-                  <span className="font-semibold text-black/60">
-                    {cat.percentage}% ({cat.count} {cat.count === 1 ? 'sale' : 'sales'})
-                  </span>
-                </div>
+            {categorySplitData.categorySplit.map((cat, idx) => {
+              const colorClass = BAR_COLORS[idx % BAR_COLORS.length];
 
-                {/* Progress Bar Container */}
-                <div className="h-2 w-full bg-black/5">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${cat.percentage}%` }}
-                    transition={{ duration: 0.6, delay: idx * 0.1 }}
-                    className={`h-full ${cat.color}`}
-                  />
+              return (
+                <div key={cat.name} className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-medium text-black">{cat.name}</span>
+                    <span className="font-semibold text-black/60">
+                      {cat.percentage}% ({cat.count} {cat.count === 1 ? 'sale' : 'sales'})
+                    </span>
+                  </div>
+
+                  {/* Progress Bar Container */}
+                  <div className="h-2 w-full overflow-hidden bg-black/5">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${cat.percentage}%` }}
+                      transition={{ duration: 0.6, delay: idx * 0.1 }}
+                      className={`h-full ${colorClass}`}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
