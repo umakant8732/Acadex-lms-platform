@@ -1,4 +1,3 @@
-import React from "react";
 import { useCourseFormPage } from "../../hooks/use-course-form-page";
 import CourseForm from "../course-form-components/course-form";
 

@@ -17,14 +17,17 @@ const DashboardPage = () => {
         </h1>
       </div>
 
+      {/* KPI Stats overview */}
       <DashboardStats />
 
-      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <AnalyticsCard />
-        <RecentCourses />
-      </div>
+      {/* Analytics graphs (full width, containing 2 columns internally) */}
+      <AnalyticsCard />
 
-      <RecentStudents />
+      {/* Details grids split side-by-side */}
+      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+        <RecentCourses />
+        <RecentStudents />
+      </div>
     </section>
   );
 };

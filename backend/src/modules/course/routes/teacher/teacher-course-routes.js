@@ -25,7 +25,11 @@ import { deleteCourse } from '../../controllers/teacher/delete-course-controller
 import { changePublishStatus } from '../../controllers/teacher/change-publish-status-controller.js'
 import { createThumbnailPresignedUploadUrl } from '../../controllers/teacher/create-thumbnail-presigned-upload-url-controller.js'
 import { completeThumbnailUpload } from '../../controllers/teacher/complete-thumbnail-upload-controller.js'
-
+import { getTeacherAnalytics } from '../../controllers/teacher/get-teacher-analytics-controller.js'
+import { getRevenuChart } from '../../controllers/teacher/get-revenue-charts-controller.js'
+import { getCategorySplit } from '../../controllers/teacher/get-category-split-controller.js'
+import { getTopPerformingCourses } from '../../controllers/teacher/get-top-performing-courses-controller.js'
+import { getRecentStudents } from '../../controllers/teacher/get-recent-students-controller.js'
 const router = Router()
 
 // Teacher routes need authentication and teacher role.
@@ -89,6 +93,41 @@ router.patch(
   roleMiddleware(ROLES.TEACHER),
   validate(changePublishStatusSchema),
   changePublishStatus
+)
+
+router.get(
+  '/teacher/analytics',
+  authMiddleware,
+  roleMiddleware(ROLES.TEACHER),
+  getTeacherAnalytics
+)
+
+router.get(
+  '/teacher/analytics/revenue-chart',
+  authMiddleware,
+  roleMiddleware(ROLES.TEACHER),
+  getRevenuChart
+)
+
+router.get(
+  '/teacher/analytics/category-split',
+  authMiddleware,
+  roleMiddleware(ROLES.TEACHER),
+  getCategorySplit
+)
+
+router.get(
+  '/teacher/analytics/top-courses',
+  authMiddleware,
+  roleMiddleware(ROLES.TEACHER),
+  getTopPerformingCourses
+)
+
+router.get(
+  '/teacher/analytics/recent-students',
+  authMiddleware,
+  roleMiddleware(ROLES.TEACHER),
+  getRecentStudents
 )
 
 export default router

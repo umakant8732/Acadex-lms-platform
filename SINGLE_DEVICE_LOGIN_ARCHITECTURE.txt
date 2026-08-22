@@ -1,0 +1,173 @@
+================================================================================
+          SINGLE DEVICE LOGIN & CONCURRENT SESSION SECURITY ARCHITECTURE
+================================================================================
+
+1. OVERVIEW & OBJECTIVE
+--------------------------------------------------------------------------------
+Objective: Restrict student accounts to a single active session across all devices.
+If a student is already logged in on Device A (e.g., Laptop) and tries to log in 
+from Device B (e.g., Mobile):
+1. Device B sees a warning modal with Device A's info and choices: [Cancel] or [Still Login].
+2. If [Still Login] is clicked, Device A is instantly terminated via WebSockets 
+   and its JWT session is invalidated in Redis.
+3. No Refresh Token complexity - clean JWT + Redis Session ID verification.
+
+
+2. ARCHITECTURE DIAGRAM & DATA FLOW
+--------------------------------------------------------------------------------
+
++-----------------------------------+            +------------------------------------+
+|   DEVICE A (e.g. Laptop/Windows)  |            |   DEVICE B (e.g. Mobile/Android)   |
+|   Currently Logged In             |            |   Attempting New Login             |
+|   Has Token (Session ID: SID_1)   |            |                                    |
++-----------------+-----------------+            +------------------+-----------------+
+                  |                                                 |
+                  |                                  [1] POST /auth/login
+                  |                                      { email, password }
+                  |                                                 |
+                  |                                                 v
+                  |                               +-----------------+-----------------+
+                  |                               |          BACKEND SERVER           |
+                  |                               +-----------------+-----------------+
+                  |                                                 |
+                  |                                  [2] Verify Credentials & Check:
+                  |                                      GET session:student:<userId>
+                  |                                                 |
+                  |                                                 v
+                  |                               +-----------------+-----------------+
+                  |                               |           REDIS STORE             |
+                  |                               | Key: session:student:<userId>     |
+                  |                               | Value: { sessionId: "SID_1",      |
+                  |                               |   device: "Chrome on Windows" }   |
+                  |                               +-----------------+-----------------+
+                  |                                                 |
+                  |                                  [3] Active Session Found!
+                  |                                      Return 409 Conflict:
+                  |                                      { code: "SESSION_CONFLICT",
+                  |                                        device: "Chrome on Windows" }
+                  |                                                 |
+                  |                                                 v
+                  |                               +-----------------+-----------------+
+                  |                               |      DEVICE B PROMPT MODAL        |
+                  |                               | "You are already logged in on     |
+                  |                               |  Chrome on Windows. Log in here?" |
+                  |                               |   [Cancel]      [Still Login]     |
+                  |                               +-----------------+-----------------+
+                  |                                                 |
+                  |                                  [4] User clicks [Still Login]:
+                  |                                      POST /auth/login
+                  |                                      { email, pass, force: true }
+                  |                                                 |
+                  |                                                 v
+                  |                               +-----------------+-----------------+
+                  |                               |          BACKEND SERVER           |
+                  |                               | 1. Generate new "SID_2"           |
+                  |                               | 2. Overwrite Redis Key            |
+                  |                               | 3. Emit WebSocket Event           |
+                  |                               +--------+----------------+---------+
+                  |                                        |                |
+                  |                                        |                | [6] Returns 200 OK
+                  | [5] WebSocket "FORCE_LOGOUT"           |                |     New JWT with SID_2
+                  |     Room: "user:<userId>"              |                v
+                  v                                        |  +-------------+------------+
++-----------------+-----------------+                      |  | DEVICE B: LOGIN SUCCESS! |
+| DEVICE A TERMINATION:             |                      |  +--------------------------+
+| - Receives WebSocket event        |                      |
+| - Wipes auth state / cookie       |                      |
+| - Halts video player immediately  |                      |
+| - Shows Modal: "Logged out from   |                      |
+|   another device"                 |                      |
++-----------------------------------+                      |
+                                                           |
+                  [7] ANY FUTURE API CALL FROM DEVICE A    |
+                      Contains old token with SID_1        |
+                      Backend: SID_1 !== SID_2 in Redis    |
+                      ===> Returns 401 Unauthorized <------+
+
+
+3. REDIS DATA SCHEMA
+--------------------------------------------------------------------------------
+Key:
+   session:student:<userId>
+
+Value (JSON String):
+   {
+      "sessionId": "uuid-v4-generated-string",
+      "device": "Chrome 128 on Windows 11",
+      "ip": "103.xxx.xxx.xxx",
+      "loggedInAt": "2026-08-22T22:45:00.000Z"
+   }
+
+TTL:
+   Same as JWT expiration (e.g., 7 days or 30 days)
+
+
+4. JWT PAYLOAD STRUCTURE
+--------------------------------------------------------------------------------
+{
+   "userId": "64f1a2b3c4d5e6f7a8b9c0d1",
+   "role": "student",
+   "sessionId": "uuid-v4-generated-string",
+   "iat": 1724345600,
+   "exp": 1724950400
+}
+
+
+5. API CONTRACTS
+--------------------------------------------------------------------------------
+
+A. Standard Login:
+   Endpoint: POST /api/v1/auth/login
+   Payload:
+   {
+      "email": "student@example.com",
+      "password": "SecurePassword123"
+   }
+
+   Responses:
+   1. Normal Success (No existing session):
+      HTTP 200 OK -> Set-Cookie / Token & User Details
+
+   2. Conflict (Existing active session on another device):
+      HTTP 409 Conflict
+      {
+         "statusCode": 409,
+         "success": false,
+         "code": "SESSION_CONFLICT",
+         "message": "You are currently logged in on another device.",
+         "data": {
+            "activeDevice": "Chrome on Windows",
+            "lastActive": "2026-08-22T21:30:00.000Z"
+         }
+      }
+
+B. Force Login (Override Session):
+   Endpoint: POST /api/v1/auth/login
+   Payload:
+   {
+      "email": "student@example.com",
+      "password": "SecurePassword123",
+      "force": true
+   }
+
+   Actions:
+   1. Overwrite session:student:<userId> with new sessionId.
+   2. Send WebSocket event to room `user:<userId>`:
+      Event Name: "FORCE_LOGOUT"
+      Payload: { "reason": "LOGGED_IN_FROM_ANOTHER_DEVICE", "newDevice": "Chrome on Android" }
+   3. Issue new JWT token to Device B.
+   HTTP 200 OK
+
+
+6. SECURITY & PERFORMANCE ADVANTAGES
+--------------------------------------------------------------------------------
+1. Zero DB Bottlenecks:
+   - Redis lookups take < 1ms in memory during middleware verification.
+2. Real-Time Piracy Prevention:
+   - WebSockets eliminate the need for polling; playback is cut off instantly.
+3. Fallback Security:
+   - Even if Device A is offline when Device B logs in, whenever Device A reconnects,
+     the Auth Middleware blocks any request because its JWT sessionId no longer matches Redis.
+4. Transparent UX:
+   - Detailed device names help students detect if their account was compromised.
+================================================================================
