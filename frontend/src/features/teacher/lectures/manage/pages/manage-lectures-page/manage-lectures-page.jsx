@@ -1,5 +1,4 @@
 /* eslint-disable react-refresh/only-export-components */
-import React from "react";
 import LectureCourseGrid from "../../components/manage-lectures-components/lecture-course-grid";
 import SectionQueryError from "@/shared/ui/feedback/section-query-error";
 import { useManageLecturesPage } from "../../hooks/use-manage-lectures-page";
