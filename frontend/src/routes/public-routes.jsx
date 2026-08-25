@@ -1,10 +1,10 @@
 /* eslint-disable react-refresh/only-export-components */
 import { lazy } from "react";
 import PublicLayout from "../layouts/public/public-layout.jsx";
+import HomePage from "../layouts/public/pages/home-page/home-page";
 import LazyLoad from "@/shared/ui/feedback/lazy-load";
 
-// Lazy-loaded public pages
-const HomePage = lazy(() => import("../layouts/public/pages/home-page/home-page"));
+// Lazy-loaded subpages
 const CoursePreviewPage = lazy(() =>
   import("../features/common/course-preview/pages/course-preview-page/course-preview-page")
 );
@@ -27,11 +27,8 @@ const publicRoutes = {
   children: [
     {
       index: true,
-      element: (
-        <LazyLoad subtitle="Loading published courses...">
-          <HomePage />
-        </LazyLoad>
-      ),
+      // HomePage is eagerly loaded for instant 0ms first paint on root landing page
+      element: <HomePage />,
     },
     {
       path: "course-details-page/:courseId",

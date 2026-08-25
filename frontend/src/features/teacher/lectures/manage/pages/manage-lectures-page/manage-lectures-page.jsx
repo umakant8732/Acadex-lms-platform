@@ -1,6 +1,7 @@
+/* eslint-disable react-refresh/only-export-components */
+import React from "react";
 import LectureCourseGrid from "../../components/manage-lectures-components/lecture-course-grid";
 import SectionQueryError from "@/shared/ui/feedback/section-query-error";
-import PageLoader from "@/shared/ui/feedback/page-loader";
 import { useManageLecturesPage } from "../../hooks/use-manage-lectures-page";
 
 const ManageLecturesPage = () => {
@@ -32,29 +33,22 @@ const ManageLecturesPage = () => {
         </div>
       </div>
 
-      {isLoading ? (
-        <PageLoader fullScreen={false} subtitle="Loading courses..." />
-      ) : isError ? (
+      {isError ? (
         <SectionQueryError
           variant="error"
           title="Unable to load courses"
           message={
             error?.response?.data?.message ||
             error?.message ||
-            "Something went wrong while fetching lecture courses."
+            "Something went wrong while loading courses for lecture management."
           }
-          actionLabel="Try Again"
+          actionLabel="Retry"
           onAction={refetchCourses}
-        />
-      ) : courses.length === 0 ? (
-        <SectionQueryError
-          variant="empty"
-          title="No courses found"
-          message="Create a course first, then you can upload lectures for its syllabus lessons."
         />
       ) : (
         <LectureCourseGrid
           courses={courses}
+          isLoading={isLoading}
           onCourseSelect={goToCourseCurriculumPage}
         />
       )}
