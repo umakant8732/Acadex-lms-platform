@@ -1,13 +1,44 @@
+/* eslint-disable react-refresh/only-export-components */
+import { lazy } from "react";
 import TeacherLayout from "../layouts/teacher/teacher-layout.jsx";
 import ProtectedRoute from "./protected-route";
 import RoleRoute from "./role-route";
-import DashboardPage from "../features/teacher/dashboard/pages/dashboard-page.jsx";
-import CreateCoursePage from "../features/teacher/courses/manage/pages/create-course-page/create-course-page.jsx";
-import ManageCoursesPage from "../features/teacher/courses/manage/pages/manage-courses-page/manage-course-page.jsx";
-import UpdateCoursePage from "../features/teacher/courses/manage/pages/update-course-page/update-course-page.jsx";
-import ViewCoursePage from "../features/teacher/courses/manage/pages/view-course-page/view-course-page.jsx";
-import ManageLecturesPage from "../features/teacher/lectures/manage/pages/manage-lectures-page/manage-lectures-page.jsx";
-import CourseCurriculumPage from "../features/teacher/lectures/manage/pages/course-curriculum-page/course-curriculum-page.jsx";
+import LazyLoad from "@/shared/ui/feedback/lazy-load";
+
+// Lazy-loaded teacher pages
+const DashboardPage = lazy(() =>
+  import("../features/teacher/dashboard/pages/dashboard-page.jsx")
+);
+const ManageCoursesPage = lazy(() =>
+  import(
+    "../features/teacher/courses/manage/pages/manage-courses-page/manage-course-page.jsx"
+  )
+);
+const CreateCoursePage = lazy(() =>
+  import(
+    "../features/teacher/courses/manage/pages/create-course-page/create-course-page.jsx"
+  )
+);
+const UpdateCoursePage = lazy(() =>
+  import(
+    "../features/teacher/courses/manage/pages/update-course-page/update-course-page.jsx"
+  )
+);
+const ViewCoursePage = lazy(() =>
+  import(
+    "../features/teacher/courses/manage/pages/view-course-page/view-course-page.jsx"
+  )
+);
+const ManageLecturesPage = lazy(() =>
+  import(
+    "../features/teacher/lectures/manage/pages/manage-lectures-page/manage-lectures-page.jsx"
+  )
+);
+const CourseCurriculumPage = lazy(() =>
+  import(
+    "../features/teacher/lectures/manage/pages/course-curriculum-page/course-curriculum-page.jsx"
+  )
+);
 
 const teacherRoutes = {
   path: "/teacher",
@@ -21,31 +52,59 @@ const teacherRoutes = {
   children: [
     {
       index: true,
-      element: <DashboardPage />,
+      element: (
+        <LazyLoad subtitle="Loading teacher dashboard...">
+          <DashboardPage />
+        </LazyLoad>
+      ),
     },
     {
       path: "courses",
-      element: <ManageCoursesPage />,
+      element: (
+        <LazyLoad subtitle="Loading course manager...">
+          <ManageCoursesPage />
+        </LazyLoad>
+      ),
     },
     {
       path: "create-course",
-      element: <CreateCoursePage />,
+      element: (
+        <LazyLoad subtitle="Loading course builder...">
+          <CreateCoursePage />
+        </LazyLoad>
+      ),
     },
     {
       path: "update-course/:courseId",
-      element: <UpdateCoursePage />,
+      element: (
+        <LazyLoad subtitle="Loading course editor...">
+          <UpdateCoursePage />
+        </LazyLoad>
+      ),
     },
     {
       path: "view-course/:courseId",
-      element: <ViewCoursePage />,
+      element: (
+        <LazyLoad subtitle="Loading course view...">
+          <ViewCoursePage />
+        </LazyLoad>
+      ),
     },
     {
       path: "lectures",
-      element: <ManageLecturesPage />,
+      element: (
+        <LazyLoad subtitle="Loading lecture manager...">
+          <ManageLecturesPage />
+        </LazyLoad>
+      ),
     },
     {
       path: "lectures/:courseId",
-      element: <CourseCurriculumPage />,
+      element: (
+        <LazyLoad subtitle="Loading course curriculum...">
+          <CourseCurriculumPage />
+        </LazyLoad>
+      ),
     },
   ],
 };

@@ -1,6 +1,6 @@
 import { Router } from 'express'
 
-import { authLimiter } from '../../../shared/middleware/rate-limit-middleware.js'
+import { authLimiter, otpLimiter } from '../../../shared/middleware/rate-limit-middleware.js'
 import validate from '../../../shared/middleware/validate-middleware.js'
 import authMiddleware from '../../../shared/middleware/auth-middleware.js'
 
@@ -30,11 +30,11 @@ router.post('/register', authLimiter, validate(registerSchema), registerUser)
 
 router.post('/login', authLimiter, validate(loginSchema), loginUser)
 
-router.post('/resend-otp', authLimiter, validate(resendOTPSchema), resendOTP)
+router.post('/resend-otp', otpLimiter, validate(resendOTPSchema), resendOTP)
 
 router.post('/verify-email', authLimiter, validate(verifyEmailSchema), verifyEmail)
 
-router.post('/forgot-password', authLimiter, validate(forgotPasswordSchema), forgotPassword)
+router.post('/forgot-password', otpLimiter, validate(forgotPasswordSchema), forgotPassword)
 
 router.post('/reset-password', authLimiter, validate(resetPasswordSchema), resetPassword)
 

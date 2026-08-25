@@ -5,6 +5,7 @@ import { ROLES } from '../../../auth/constants/auth-constants.js'
 import roleMiddleware from '../../../../shared/middleware/role-middleware.js'
 import validate from '../../../../shared/middleware/validate-middleware.js'
 import validateQuery from '../../../../shared/middleware/validate-query-middleware.js'
+import { uploadLimiter } from '../../../../shared/middleware/rate-limit-middleware.js'
 
 import {
   createCourseSchema,
@@ -68,6 +69,7 @@ router.post(
   '/thumbnail/presigned-url/:courseId',
   authMiddleware,
   roleMiddleware(ROLES.TEACHER),
+  uploadLimiter,
   validate(createThumbnailPresignedUploadUrlSchema),
   createThumbnailPresignedUploadUrl
 )

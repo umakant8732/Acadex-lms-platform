@@ -12,7 +12,7 @@ const ProtectedRoute = ({ children }) => {
   const isLoading = useAppSelector(selectAuthLoading);
 
   if (isLoading) {
-    return <PageLoader />;
+    return <PageLoader subtitle="Verifying your session..." />;
   }
 
   if (!user) {

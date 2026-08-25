@@ -1,5 +1,6 @@
 import React from "react";
 import SectionQueryError from "@/shared/ui/feedback/section-query-error";
+import PageLoader from "@/shared/ui/feedback/page-loader";
 import { useLectureCurriculumPage } from "../../hooks/use-lecture-curriculum-page";
 import LectureCurriculumContent from "../../components/course-curriculum-components/lecture-curriculum-content";
 import LecturePreviewPlayer from "../../components/course-curriculum-components/lecture-preview-player";
@@ -31,11 +32,7 @@ const CourseCurriculumPage = () => {
   } = useLectureCurriculumPage();
 
   if (isLoading) {
-    return (
-      <div className="border border-black/10 bg-white p-6 text-sm text-black/60">
-        Loading lecture curriculum...
-      </div>
-    );
+    return <PageLoader fullScreen={false} subtitle="Loading lecture curriculum..." />;
   }
 
   if (isError) {

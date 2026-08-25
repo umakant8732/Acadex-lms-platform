@@ -1,13 +1,40 @@
+/* eslint-disable react-refresh/only-export-components */
+import { lazy } from "react";
 import StudentLayout from "../layouts/student/student-layout";
-import CoursePreviewPage from "../features/common/course-preview/pages/course-preview-page/course-preview-page";
-import StudentCourseOverviewPage from "../features/student/courses/overview/pages/student-course-overview-page/student-course-overview-page";
-import StudentWatchPage from "../features/student/lectures/watch/pages/student-watch-page/student-watch-page";
-import StudentHomePage from "../features/student/dashboard/pages/student-home-page";
-import StudentWishlistPage from "../features/student/dashboard/pages/student-wishlist-page";
-import StudentInvoicesPage from "../features/student/courses/checkout/pages/student-invoices-page";
-import StudentMyLearningPage from "../features/student/courses/my-learning/pages/student-my-learning-page";
 import ProtectedRoute from "./protected-route";
 import RoleRoute from "./role-route";
+import LazyLoad from "@/shared/ui/feedback/lazy-load";
+
+// Lazy-loaded student pages
+const StudentHomePage = lazy(() =>
+  import("../features/student/dashboard/pages/student-home-page")
+);
+const StudentCourseOverviewPage = lazy(() =>
+  import(
+    "../features/student/courses/overview/pages/student-course-overview-page/student-course-overview-page"
+  )
+);
+const StudentWatchPage = lazy(() =>
+  import(
+    "../features/student/lectures/watch/pages/student-watch-page/student-watch-page"
+  )
+);
+const CoursePreviewPage = lazy(() =>
+  import(
+    "../features/common/course-preview/pages/course-preview-page/course-preview-page"
+  )
+);
+const StudentMyLearningPage = lazy(() =>
+  import(
+    "../features/student/courses/my-learning/pages/student-my-learning-page"
+  )
+);
+const StudentWishlistPage = lazy(() =>
+  import("../features/student/dashboard/pages/student-wishlist-page")
+);
+const StudentInvoicesPage = lazy(() =>
+  import("../features/student/courses/checkout/pages/student-invoices-page")
+);
 
 const studentRoutes = {
   path: "/student",
@@ -21,35 +48,67 @@ const studentRoutes = {
   children: [
     {
       index: true,
-      element: <StudentHomePage />,
+      element: (
+        <LazyLoad subtitle="Loading student dashboard...">
+          <StudentHomePage />
+        </LazyLoad>
+      ),
     },
     {
       path: "courses/:courseId",
-      element: <StudentCourseOverviewPage />,
+      element: (
+        <LazyLoad subtitle="Loading course overview...">
+          <StudentCourseOverviewPage />
+        </LazyLoad>
+      ),
     },
     {
       path: "courses/:courseId/learn",
-      element: <StudentWatchPage />,
+      element: (
+        <LazyLoad subtitle="Loading lecture player...">
+          <StudentWatchPage />
+        </LazyLoad>
+      ),
     },
     {
       path: "courses/:courseId/learn/:lessonId",
-      element: <StudentWatchPage />,
+      element: (
+        <LazyLoad subtitle="Loading lecture player...">
+          <StudentWatchPage />
+        </LazyLoad>
+      ),
     },
     {
       path: "checkout/:courseId",
-      element: <CoursePreviewPage />,
+      element: (
+        <LazyLoad subtitle="Loading checkout...">
+          <CoursePreviewPage />
+        </LazyLoad>
+      ),
     },
     {
       path: "my-learning",
-      element: <StudentMyLearningPage />,
+      element: (
+        <LazyLoad subtitle="Loading enrolled courses...">
+          <StudentMyLearningPage />
+        </LazyLoad>
+      ),
     },
     {
       path: "wishlist",
-      element: <StudentWishlistPage />,
+      element: (
+        <LazyLoad subtitle="Loading wishlist...">
+          <StudentWishlistPage />
+        </LazyLoad>
+      ),
     },
     {
       path: "invoices",
-      element: <StudentInvoicesPage />,
+      element: (
+        <LazyLoad subtitle="Loading invoices...">
+          <StudentInvoicesPage />
+        </LazyLoad>
+      ),
     },
   ],
 };

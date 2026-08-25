@@ -11,7 +11,7 @@ const CoursesSection = () => {
     usePublishedCourseCatalog();
 
   if (isLoading) {
-    return <PageLoader />;
+    return <PageLoader fullScreen={false} subtitle="Loading published courses..." />;
   }
 
   return (

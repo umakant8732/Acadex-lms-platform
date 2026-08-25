@@ -1,12 +1,25 @@
+/* eslint-disable react-refresh/only-export-components */
+import { lazy } from "react";
 import PublicLayout from "../layouts/public/public-layout.jsx";
-import HomePage from "../layouts/public/pages/home-page/home-page";
-import CoursePreviewPage from "../features/common/course-preview/pages/course-preview-page/course-preview-page";
+import LazyLoad from "@/shared/ui/feedback/lazy-load";
 
-// Legal & Compliance Pages
-import TermsOfServicePage from "../features/common/legal/pages/terms-of-service-page";
-import PrivacyPolicyPage from "../features/common/legal/pages/privacy-policy-page";
-import RefundPolicyPage from "../features/common/legal/pages/refund-policy-page";
-import ContactUsPage from "../features/common/legal/pages/contact-us-page";
+// Lazy-loaded public pages
+const HomePage = lazy(() => import("../layouts/public/pages/home-page/home-page"));
+const CoursePreviewPage = lazy(() =>
+  import("../features/common/course-preview/pages/course-preview-page/course-preview-page")
+);
+const TermsOfServicePage = lazy(() =>
+  import("../features/common/legal/pages/terms-of-service-page")
+);
+const PrivacyPolicyPage = lazy(() =>
+  import("../features/common/legal/pages/privacy-policy-page")
+);
+const RefundPolicyPage = lazy(() =>
+  import("../features/common/legal/pages/refund-policy-page")
+);
+const ContactUsPage = lazy(() =>
+  import("../features/common/legal/pages/contact-us-page")
+);
 
 const publicRoutes = {
   path: "/",
@@ -14,27 +27,51 @@ const publicRoutes = {
   children: [
     {
       index: true,
-      element: <HomePage />,
+      element: (
+        <LazyLoad subtitle="Loading published courses...">
+          <HomePage />
+        </LazyLoad>
+      ),
     },
     {
       path: "course-details-page/:courseId",
-      element: <CoursePreviewPage />,
+      element: (
+        <LazyLoad subtitle="Loading course details...">
+          <CoursePreviewPage />
+        </LazyLoad>
+      ),
     },
     {
       path: "terms-of-service",
-      element: <TermsOfServicePage />,
+      element: (
+        <LazyLoad>
+          <TermsOfServicePage />
+        </LazyLoad>
+      ),
     },
     {
       path: "privacy-policy",
-      element: <PrivacyPolicyPage />,
+      element: (
+        <LazyLoad>
+          <PrivacyPolicyPage />
+        </LazyLoad>
+      ),
     },
     {
       path: "refund-policy",
-      element: <RefundPolicyPage />,
+      element: (
+        <LazyLoad>
+          <RefundPolicyPage />
+        </LazyLoad>
+      ),
     },
     {
       path: "contact-us",
-      element: <ContactUsPage />,
+      element: (
+        <LazyLoad>
+          <ContactUsPage />
+        </LazyLoad>
+      ),
     },
   ],
 };

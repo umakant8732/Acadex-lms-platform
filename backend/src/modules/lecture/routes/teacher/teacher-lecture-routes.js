@@ -3,6 +3,7 @@ import { Router } from 'express'
 import authMiddleware from '../../../../shared/middleware/auth-middleware.js'
 import roleMiddleware from '../../../../shared/middleware/role-middleware.js'
 import validate from '../../../../shared/middleware/validate-middleware.js'
+import { uploadLimiter } from '../../../../shared/middleware/rate-limit-middleware.js'
 
 import { ROLES } from '../../../auth/constants/auth-constants.js'
 
@@ -40,6 +41,7 @@ router.post(
   '/uploads/presigned-url',
   authMiddleware,
   roleMiddleware(ROLES.TEACHER),
+  uploadLimiter,
   validate(createPresignedUploadUrlSchema),
   createPresignedUploadUrl
 )
@@ -57,6 +59,7 @@ router.post(
   '/upload/retry',
   authMiddleware,
   roleMiddleware(ROLES.TEACHER),
+  uploadLimiter,
   validate(retryTranscodeSchema),
   retryTranscode
 )

@@ -169,8 +169,8 @@ const AnalyticsCard = () => {
 
             {/* X-Axis labels */}
             <div className="mt-2 flex justify-between px-3 text-xs font-medium text-black/40">
-              {chartData.map((d) => (
-                <span key={d.month}>{d.month}</span>
+              {chartData.map((d, idx) => (
+                <span key={`${d.year || ''}-${d.month}-${idx}`}>{d.month}</span>
               ))}
             </div>
           </>

@@ -1,121 +1,124 @@
-import React from "react";
+import { motion } from "framer-motion";
 
-const SkeletonBlock = ({ className = "" }) => {
-  return <div className={`bg-black/5 animate-pulse ${className}`} />;
-};
-
-const PageLoader = () => {
+/**
+ * Premium Unified Loader for Acadex
+ * Used across route transitions, initial app boots, and page-level async data loading.
+ */
+const PageLoader = ({
+  message = "Loading Acadex",
+  subtitle = "Preparing your workspace...",
+  fullScreen = true,
+  className = "",
+}) => {
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.25 }}
       role="status"
       aria-live="polite"
-      className="relative min-h-screen overflow-hidden bg-[#f5f5f5] text-black"
+      className={`relative flex items-center justify-center overflow-hidden bg-[#fafafa] text-black ${
+        fullScreen ? "fixed inset-0 z-50 min-h-screen" : "min-h-[420px] w-full py-16"
+      } ${className}`}
     >
-      <div className="absolute inset-x-0 top-0 h-1 bg-black/5">
-        <div className="h-full w-1/3 bg-black animate-[pulse_1s_ease-in-out_infinite]" />
+      {/* 1. Sleek Top Laser Loading Beam */}
+      <div className="absolute inset-x-0 top-0 h-[2px] overflow-hidden bg-black/5">
+        <motion.div
+          className="h-full w-40 bg-black"
+          initial={{ x: "-100%" }}
+          animate={{ x: "100vw" }}
+          transition={{
+            repeat: Infinity,
+            duration: 1.4,
+            ease: "easeInOut",
+          }}
+        />
       </div>
 
-      <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-5 py-5 md:px-8">
-        <header className="flex h-16 items-center justify-between border-b border-black/5 bg-white px-4 md:px-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center bg-black text-sm font-semibold text-white">
+      {/* 2. Ambient Background Glows */}
+      <div className="pointer-events-none absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-black/[0.02] blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-emerald-500/[0.03] blur-3xl" />
+
+      {/* 3. Central Brand Motion Unit */}
+      <div className="relative flex flex-col items-center text-center px-6">
+        {/* Floating Brand Badge with Orbiting Ring */}
+        <div className="relative flex h-20 w-20 items-center justify-center">
+          {/* Outer Rotating Segmented Border */}
+          <motion.div
+            className="absolute inset-0 rounded-2xl border-2 border-dashed border-black/20"
+            animate={{ rotate: 360 }}
+            transition={{
+              repeat: Infinity,
+              duration: 8,
+              ease: "linear",
+            }}
+          />
+
+          {/* Inner Sharp Brand Box */}
+          <motion.div
+            className="relative flex h-14 w-14 items-center justify-center rounded-xl bg-black shadow-xl shadow-black/10"
+            animate={{
+              y: [-3, 3, -3],
+              scale: [1, 1.02, 1],
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 3,
+              ease: "easeInOut",
+            }}
+          >
+            <span className="text-base font-bold tracking-wider text-white">
               AC
-            </div>
+            </span>
 
-            <div>
-              <p className="text-sm font-semibold leading-none">
-                Acadex Platform
-              </p>
-              <p className="mt-1 text-xs text-black/40">Loading workspace</p>
-            </div>
+            {/* Glowing Live Green Dot */}
+            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
+            </span>
+          </motion.div>
+        </div>
+
+        {/* Brand Name & Loading Message */}
+        <motion.div
+          className="mt-6 space-y-1.5"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.3 }}
+        >
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-xs font-bold uppercase tracking-[0.25em] text-black">
+              Acadex
+            </span>
+            <span className="h-1 w-1 rounded-full bg-black/30" />
+            <span className="text-xs font-medium text-black/50">
+              Platform
+            </span>
           </div>
 
-          <div className="hidden items-center gap-3 md:flex">
-            <SkeletonBlock className="h-2 w-16" />
-            <SkeletonBlock className="h-2 w-20" />
-            <SkeletonBlock className="h-9 w-9" />
-          </div>
-        </header>
+          <p className="text-xs text-black/40 font-normal">
+            {subtitle}
+          </p>
+        </motion.div>
 
-        <main className="grid flex-1 gap-5 py-5 md:grid-cols-[240px_1fr]">
-          <aside className="hidden border border-black/5 bg-white p-4 md:block">
-            <SkeletonBlock className="h-9 w-full" />
-
-            <div className="mt-8 space-y-3">
-              <SkeletonBlock className="h-10 w-full" />
-              <SkeletonBlock className="h-10 w-11/12" />
-              <SkeletonBlock className="h-10 w-full" />
-              <SkeletonBlock className="h-10 w-10/12" />
-            </div>
-          </aside>
-
-          <section className="border border-black/5 bg-white p-5 md:p-8">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <SkeletonBlock className="h-3 w-24" />
-                <SkeletonBlock className="mt-4 h-10 w-64 max-w-full" />
-              </div>
-
-              <div className="flex items-center gap-3">
-                <SkeletonBlock className="h-10 w-28" />
-                <SkeletonBlock className="h-10 w-10" />
-              </div>
-            </div>
-
-            <div className="mt-10 grid gap-4 md:grid-cols-3">
-              <SkeletonBlock className="h-28 w-full" />
-              <SkeletonBlock className="h-28 w-full" />
-              <SkeletonBlock className="h-28 w-full" />
-            </div>
-
-            <div className="mt-8 grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-              <div className="border border-black/5 p-5">
-                <SkeletonBlock className="h-4 w-32" />
-
-                <div className="mt-8 flex h-48 items-end gap-3">
-                  <SkeletonBlock className="h-20 flex-1" />
-                  <SkeletonBlock className="h-36 flex-1" />
-                  <SkeletonBlock className="h-28 flex-1" />
-                  <SkeletonBlock className="h-44 flex-1" />
-                  <SkeletonBlock className="h-32 flex-1" />
-                </div>
-              </div>
-
-              <div className="border border-black/5 p-5">
-                <SkeletonBlock className="h-4 w-36" />
-
-                <div className="mt-8 space-y-4">
-                  <SkeletonBlock className="h-12 w-full" />
-                  <SkeletonBlock className="h-12 w-full" />
-                  <SkeletonBlock className="h-12 w-full" />
-                </div>
-              </div>
-            </div>
-          </section>
-        </main>
-      </div>
-
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-5">
-        <div className="flex items-center gap-4 border border-black/10 bg-white/90 px-5 py-4 shadow-sm backdrop-blur-md">
-          <div className="relative h-11 w-11 shrink-0">
-            <div className="absolute inset-0 border border-black/10" />
-            <div className="absolute inset-0 animate-spin border border-transparent border-t-black" />
-            <div className="absolute inset-4 bg-emerald-500" />
-          </div>
-
-          <div>
-            <p className="text-sm font-semibold">
-              Preparing your learning space
-            </p>
-            <p className="mt-1 text-xs text-black/50">
-              Courses, progress and dashboard are almost ready.
-            </p>
-          </div>
+        {/* Minimal Animated Progress Bar Line */}
+        <div className="mt-5 h-[3px] w-36 overflow-hidden rounded-full bg-black/5">
+          <motion.div
+            className="h-full rounded-full bg-black"
+            initial={{ x: "-100%", width: "45%" }}
+            animate={{ x: "250%" }}
+            transition={{
+              repeat: Infinity,
+              duration: 1.2,
+              ease: "easeInOut",
+            }}
+          />
         </div>
       </div>
 
-      <span className="sr-only">Loading Acadex Platform</span>
-    </div>
+      <span className="sr-only">{message}</span>
+    </motion.div>
   );
 };
 

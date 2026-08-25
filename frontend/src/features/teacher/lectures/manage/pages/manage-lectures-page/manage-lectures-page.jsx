@@ -1,6 +1,6 @@
-import React from "react";
 import LectureCourseGrid from "../../components/manage-lectures-components/lecture-course-grid";
 import SectionQueryError from "@/shared/ui/feedback/section-query-error";
+import PageLoader from "@/shared/ui/feedback/page-loader";
 import { useManageLecturesPage } from "../../hooks/use-manage-lectures-page";
 
 const ManageLecturesPage = () => {
@@ -33,9 +33,7 @@ const ManageLecturesPage = () => {
       </div>
 
       {isLoading ? (
-        <div className="border border-black/10 bg-white p-6 text-sm text-black/60">
-          Loading courses...
-        </div>
+        <PageLoader fullScreen={false} subtitle="Loading courses..." />
       ) : isError ? (
         <SectionQueryError
           variant="error"
